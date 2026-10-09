@@ -1,0 +1,32 @@
+# F:\v\project\dsh-test\bonsai\llamacpp\bin\llama-server.exe -m F:\v\project\dsh-test\bonsai\models\Ternary-Bonsai-2-27B-PTQ1_0.gguf -ngl 99 -c 16384 -fa on -b 2048 -ub 512 -np 1 --host 127.0.0.1 --port 8110 --reasoning-effort none -ctk f16 -ctv f16 --no-mmap --cache-ram 4096 --mmproj F:\v\project\dsh-test\bonsai\models\Ternary-Bonsai-2-27B-mmproj-Q8_0.gguf --image-min-tokens 1024
+0.00.162.848 W DEPRECATED: --mmap and --no-mmap are deprecated. use --load-mode mmap instead
+0.00.163.014 I cmn  common_param: common_params_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+0.00.163.253 W srv  llama_server: -----------------
+0.00.163.256 W srv  llama_server: CORS is set to allow all origins ('*') and no API key is set
+0.00.163.256 W srv  llama_server: this can be a security risk (cross-origin attacks)
+0.00.163.257 W srv  llama_server: more info: https://github.com/ggml-org/llama.cpp/pull/25655
+0.00.163.257 W srv  llama_server: -----------------
+0.00.181.087 I srv    load_model: loading model 'F:\v\project\dsh-test\bonsai\models\Ternary-Bonsai-2-27B-PTQ1_0.gguf'
+0.00.846.568 W common_fit_params: failed to fit params to free device memory: n_gpu_layers already set by user to 99, abort
+0.02.518.330 I cmn          init: llama threadpool init, n_threads = 16
+0.04.662.295 I srv    load_model: loaded multimodal model, 'F:\v\project\dsh-test\bonsai\models\Ternary-Bonsai-2-27B-mmproj-Q8_0.gguf'
+0.05.010.673 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 16384, kv_unified = 'false'
+0.05.021.850 I srv          init: chat template supports preserving reasoning, consider enabling it via --reasoning-preserve
+0.05.022.133 I srv  llama_server: model loaded
+0.05.022.140 I srv  llama_server: listening on http://127.0.0.1:8110
+0.07.509.965 I slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = -1
+0.07.510.269 I slot launch_slot_: id  0 | task 0 | processing task, is_child = 0
+0.20.333.965 W find_slot: non-consecutive token position 23 after 22 for sequence 0 with 512 new tokens
+0.20.333.973 W find_slot: non-consecutive token position 23 after 23 for sequence 0 with 512 new tokens
+0.20.333.973 W find_slot: non-consecutive token position 23 after 23 for sequence 0 with 51 new tokens
+0.20.334.464 W find_slot: non-consecutive token position 23 after 22 for sequence 0 with 512 new tokens
+0.21.602.311 W find_slot: non-consecutive token position 23 after 23 for sequence 0 with 512 new tokens
+0.22.579.582 W find_slot: non-consecutive token position 23 after 23 for sequence 0 with 51 new tokens
+0.23.177.218 W find_slot: non-consecutive token position 71 after 23 for sequence 0 with 6 new tokens
+0.23.177.264 W find_slot: non-consecutive token position 71 after 23 for sequence 0 with 6 new tokens
+0.23.380.917 I slot print_timing: id  0 | task 0 | prompt processing, n_tokens =   1104, progress = 1.00, t =  15.87 s / 69.56 tokens per second
+0.25.428.028 I slot print_timing: id  0 | task 0 | prompt eval time =   16101.59 ms /  1108 tokens (   14.53 ms per token,    68.81 tokens per second)
+0.25.428.034 I slot print_timing: id  0 | task 0 |        eval time =    1816.31 ms /    19 tokens (  100.91 ms per token,     9.91 tokens per second)
+0.25.428.035 I slot print_timing: id  0 | task 0 |       total time =   17917.89 ms /  1127 tokens
+0.25.428.036 I slot print_timing: id  0 | task 0 |    graphs reused =         18
+0.25.428.438 I slot      release: id  0 | task 0 | stop processing: n_tokens = 1126, truncated = 0

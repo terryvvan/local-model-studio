@@ -1,0 +1,32 @@
+﻿[
+    {
+        "cfg":  "f16 KV, no LoRA",
+        "wall_s":  18,
+        "prompt_tok":  1108,
+        "prefill_tps":  68.8,
+        "gen_tok":  19,
+        "gen_tps":  9.9,
+        "answer":  "An abstract blue digital wallpaper featuring smooth, flowing ribbon-like shapes with soft gradients and highlights.",
+        "err":  ""
+    },
+    {
+        "cfg":  "q8_0 KV, no LoRA",
+        "wall_s":  4.7,
+        "prompt_tok":  1108,
+        "prefill_tps":  270.5,
+        "gen_tok":  14,
+        "gen_tps":  22.3,
+        "answer":  "An abstract digital wallpaper featuring smooth, flowing blue curves and gradients.",
+        "err":  ""
+    },
+    {
+        "cfg":  "f16 KV, LoRA scale 2",
+        "wall_s":  37.3,
+        "prompt_tok":  1108,
+        "prefill_tps":  31.4,
+        "gen_tok":  19,
+        "gen_tps":  9.1,
+        "answer":  "An abstract digital wallpaper featuring smooth, flowing blue waves and curves against a deep blue background.",
+        "err":  ""
+    }
+]

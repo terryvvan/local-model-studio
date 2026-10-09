@@ -1,0 +1,2 @@
+FROM bonsai-test
+ADAPTER F:\v\project\dsh-test\bonsai\lora\bonsai-abliterate-lora.gguf

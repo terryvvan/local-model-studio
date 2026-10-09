@@ -1,0 +1,13 @@
+0.00.120.471 W DEPRECATED: --mmap and --no-mmap are deprecated. use --load-mode mmap instead
+0.00.120.629 I cmn  common_param: common_params_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+0.00.120.857 W srv  llama_server: -----------------
+0.00.120.858 W srv  llama_server: CORS is set to allow all origins ('*') and no API key is set
+0.00.120.858 W srv  llama_server: this can be a security risk (cross-origin attacks)
+0.00.120.858 W srv  llama_server: more info: https://github.com/ggml-org/llama.cpp/pull/25655
+0.00.120.859 W srv  llama_server: -----------------
+0.00.125.304 I srv    load_model: loading model 'F:\v\project\dsh-test\bonsai\models\Ternary-Bonsai-2-27B-PTQ1_0.gguf'
+0.02.863.988 I cmn          init: llama threadpool init, n_threads = 16
+0.03.117.789 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 4096, kv_unified = 'false'
+0.03.122.211 I srv          init: chat template supports preserving reasoning, consider enabling it via --reasoning-preserve
+0.03.122.230 I srv  llama_server: model loaded
+0.03.122.231 I srv  llama_server: listening on http://127.0.0.1:8097

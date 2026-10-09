@@ -1,0 +1,12 @@
+{
+  "name": "local-model-studio",
+  "private": true,
+  "version": "1.0.0",
+  "description": "本地文档解析 / 本地视觉模型识图（pdfjs-dist 渲染 + mammoth/exceljs 解析 + llama.cpp mtmd 识图）",
+  "dependencies": {
+    "@napi-rs/canvas": "^1.0.10",
+    "exceljs": "^4.4.0",
+    "mammoth": "^1.13.0",
+    "pdfjs-dist": "^6.4.299"
+  }
+}

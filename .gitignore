@@ -1,0 +1,31 @@
+# ── 模型权重与推理运行时（30 GB，不进仓库；按 README 自行下载）────────────
+chat/models/
+chat/llamacpp/
+chat/lora/
+chat/*.zip
+
+# ── 依赖 ──────────────────────────────────────────────────────────────
+node_modules/
+
+# ── 运行态：日志 / 进程号 / 会话 / 图库 ────────────────────────────────
+app/logs/
+app/sessions.json
+image/*.log
+image/history.json
+image/settings.json
+image/studio-url.txt
+image/output/
+image/cache/
+image/tmp/
+chat/logs/
+
+# ── 本机调试产物 ──────────────────────────────────────────────────────
+.ui-shots/
+*.orig
+*.bak
+
+# ── 杂项 ──────────────────────────────────────────────────────────────
+Thumbs.db
+desktop.ini
+.DS_Store
+*.swp

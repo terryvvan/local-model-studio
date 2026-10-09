@@ -1,0 +1,55 @@
+{
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": { "unet_name": "qwen_image_2.1_int8_convrot.safetensors", "weight_dtype": "default" }
+  },
+  "2": {
+    "class_type": "CLIPLoader",
+    "inputs": { "clip_name": "qwen3vl_8b_w4a8.safetensors", "type": "qwen_image", "device": "default" }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": { "vae_name": "qwen_image_2.1_vae_bf16.safetensors" }
+  },
+  "5": {
+    "class_type": "QwenImage21Cache",
+    "inputs": { "model": ["1", 0], "device": "auto", "dtype": "default" }
+  },
+  "6": {
+    "class_type": "TextEncodeQwenImage21",
+    "inputs": {
+      "clip": ["2", 0],
+      "vae": ["3", 0],
+      "prompt": "A cozy Japanese kissaten cafe corner at golden hour, warm afternoon light streaming through tall windows onto a dark walnut table. On the table: a glass cup of iced latte with visible layers of milk and espresso, a small white ceramic plate with a slice of strawberry shortcake, and an open sketchbook with a fountain pen resting on it. Dust motes float in the light. Shot on 50mm lens, shallow depth of field, soft natural shadows, kodak portra film look, highly detailed, no text",
+      "negative_prompt": "",
+      "resolution": 1024
+    }
+  },
+  "7": {
+    "class_type": "EmptyLatentImage",
+    "inputs": { "width": 1024, "height": 1024, "batch_size": 1 }
+  },
+  "8": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": ["5", 0],
+      "positive": ["6", 0],
+      "negative": ["6", 1],
+      "latent_image": ["7", 0],
+      "seed": 20260927,
+      "steps": 25,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0
+    }
+  },
+  "9": {
+    "class_type": "VAEDecode",
+    "inputs": { "samples": ["8", 0], "vae": ["3", 0] }
+  },
+  "10": {
+    "class_type": "SaveImage",
+    "inputs": { "images": ["9", 0], "filename_prefix": "qwen21_quality25" }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "appPort": 8890,
+  "chat": {
+    "binDir": "chat/llamacpp/bin",
+    "modelsDir": "chat/models",
+    "loraDir": "chat/lora",
+    "enginePort": 8110,
+    "autoStartChat": true
+  },
+  "image": {
+    "portable": "E:\\ComfyUI_windows_portable",
+    "modelRoot": "E:\\ComfyUI\\ComfyUI\\models",
+    "bridgePort": 8802,
+    "comfyPort": 8188
+  },
+  "search": {
+    "enabled": true,
+    "endpoint": "https://www.bing.com/search",
+    "count": 8
+  },
+  "vram": {
+    "releaseTargetMiB": 1500,
+    "releaseTimeoutMs": 45000
+  }
+}

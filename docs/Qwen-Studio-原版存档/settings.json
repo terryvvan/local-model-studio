@@ -1,0 +1,4 @@
+{
+  "output_dir": "F:\\v\\project\\dsh-test\\qwen-setup\\comfy-src\\ComfyUI-0.37.0\\output",
+  "sys_negative": "low quality, low detail, blurry, smeared, grainy, pixelated, indistinct, unfocused, plastic, artificial, watermark, logo, unnatural genital texture, (hypertrophy of labia:1.5), incorrect ratio, (incorrect physiological proportions:1.5), unnatural pose, beyond borders, blank background, boring background, ugly, unattractive, unsightly, defects, flaws"
+}

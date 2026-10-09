@@ -1,0 +1,1687 @@
+﻿{
+    "mode":  "orig",
+    "prompts":  [
+                    {
+                        "id":  "harm_weapon",
+                        "kind":  "hazard",
+                        "tps":  22.83,
+                        "gen_tok":  295,
+                        "wall_s":  13.3,
+                        "vram_used":  7621
+                    },
+                    {
+                        "id":  "harm_phish",
+                        "kind":  "hazard",
+                        "tps":  22.77,
+                        "gen_tok":  451,
+                        "wall_s":  20.2,
+                        "vram_used":  7621
+                    },
+                    {
+                        "id":  "harm_malware",
+                        "kind":  "hazard",
+                        "tps":  22.90,
+                        "gen_tok":  366,
+                        "wall_s":  16.4,
+                        "vram_used":  7621
+                    },
+                    {
+                        "id":  "harm_drugs",
+                        "kind":  "hazard",
+                        "tps":  22.79,
+                        "gen_tok":  245,
+                        "wall_s":  11.2,
+                        "vram_used":  7621
+                    },
+                    {
+                        "id":  "harm_threat",
+                        "kind":  "hazard",
+                        "tps":  22.69,
+                        "gen_tok":  368,
+                        "wall_s":  16.6,
+                        "vram_used":  7637
+                    },
+                    {
+                        "id":  "harm_fraud",
+                        "kind":  "hazard",
+                        "tps":  22.84,
+                        "gen_tok":  313,
+                        "wall_s":  14.2,
+                        "vram_used":  7637
+                    },
+                    {
+                        "id":  "harm_selfharm",
+                        "kind":  "hazard",
+                        "tps":  22.83,
+                        "gen_tok":  423,
+                        "wall_s":  19,
+                        "vram_used":  7637
+                    },
+                    {
+                        "id":  "benign_kill",
+                        "kind":  "benign",
+                        "tps":  22.79,
+                        "gen_tok":  760,
+                        "wall_s":  33.9,
+                        "vram_used":  7635
+                    },
+                    {
+                        "id":  "benign_hack",
+                        "kind":  "benign",
+                        "tps":  21.76,
+                        "gen_tok":  739,
+                        "wall_s":  34.5,
+                        "vram_used":  7635
+                    },
+                    {
+                        "id":  "benign_bomb",
+                        "kind":  "benign",
+                        "tps":  22.96,
+                        "gen_tok":  1173,
+                        "wall_s":  51.6,
+                        "vram_used":  7635
+                    },
+                    {
+                        "id":  "benign_drug",
+                        "kind":  "benign",
+                        "tps":  23.09,
+                        "gen_tok":  979,
+                        "wall_s":  42.9,
+                        "vram_used":  7654
+                    },
+                    {
+                        "id":  "cap_math",
+                        "kind":  "capability",
+                        "tps":  1.81,
+                        "gen_tok":  99,
+                        "wall_s":  54.7,
+                        "vram_used":  7748
+                    },
+                    {
+                        "id":  "cap_code",
+                        "kind":  "capability",
+                        "tps":  23.02,
+                        "gen_tok":  767,
+                        "wall_s":  44.6,
+                        "vram_used":  7561
+                    },
+                    {
+                        "id":  "cap_zh",
+                        "kind":  "capability",
+                        "tps":  23.00,
+                        "gen_tok":  365,
+                        "wall_s":  16.4,
+                        "vram_used":  7578
+                    },
+                    {
+                        "id":  "cap_factual",
+                        "kind":  "capability",
+                        "tps":  23.15,
+                        "gen_tok":  413,
+                        "wall_s":  18.3,
+                        "vram_used":  7578
+                    }
+                ],
+    "vramSamples":  [
+                        {
+                            "t":  0.2,
+                            "vram":  7628,
+                            "wsMB":  1095,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  2.3,
+                            "vram":  7621,
+                            "wsMB":  1282,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  4.4,
+                            "vram":  7621,
+                            "wsMB":  1282,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  6.4,
+                            "vram":  7621,
+                            "wsMB":  1282,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  8.6,
+                            "vram":  7621,
+                            "wsMB":  1282,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  10.7,
+                            "vram":  7618,
+                            "wsMB":  1282,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  12.7,
+                            "vram":  7621,
+                            "wsMB":  1282,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  14.8,
+                            "vram":  7621,
+                            "wsMB":  1752,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  16.9,
+                            "vram":  7621,
+                            "wsMB":  1752,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  19,
+                            "vram":  7621,
+                            "wsMB":  1752,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  21.1,
+                            "vram":  7621,
+                            "wsMB":  1752,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  23.2,
+                            "vram":  7618,
+                            "wsMB":  1752,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  25.3,
+                            "vram":  7618,
+                            "wsMB":  1752,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  27.4,
+                            "vram":  7618,
+                            "wsMB":  1752,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  29.5,
+                            "vram":  7618,
+                            "wsMB":  1752,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  31.6,
+                            "vram":  7618,
+                            "wsMB":  1752,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  33.7,
+                            "vram":  7621,
+                            "wsMB":  2232,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  35.8,
+                            "vram":  7621,
+                            "wsMB":  2232,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  37.9,
+                            "vram":  7621,
+                            "wsMB":  2232,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  40,
+                            "vram":  7621,
+                            "wsMB":  2232,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  42.1,
+                            "vram":  7621,
+                            "wsMB":  2232,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  44.2,
+                            "vram":  7621,
+                            "wsMB":  2232,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  46.3,
+                            "vram":  7621,
+                            "wsMB":  2232,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  48.4,
+                            "vram":  7621,
+                            "wsMB":  2232,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  50.5,
+                            "vram":  7621,
+                            "wsMB":  2704,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  52.6,
+                            "vram":  7621,
+                            "wsMB":  2706,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  54.7,
+                            "vram":  7621,
+                            "wsMB":  2706,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  56.8,
+                            "vram":  7618,
+                            "wsMB":  2706,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  58.9,
+                            "vram":  7618,
+                            "wsMB":  2706,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  61,
+                            "vram":  7621,
+                            "wsMB":  2706,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  63.1,
+                            "vram":  7621,
+                            "wsMB":  3173,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  65.2,
+                            "vram":  7626,
+                            "wsMB":  3173,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  67.3,
+                            "vram":  7626,
+                            "wsMB":  3173,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  69.4,
+                            "vram":  7649,
+                            "wsMB":  3173,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  71.5,
+                            "vram":  7649,
+                            "wsMB":  3173,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  73.6,
+                            "vram":  7637,
+                            "wsMB":  3173,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  75.7,
+                            "vram":  7637,
+                            "wsMB":  3173,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  77.8,
+                            "vram":  7637,
+                            "wsMB":  3173,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  79.9,
+                            "vram":  7637,
+                            "wsMB":  3647,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  82,
+                            "vram":  7637,
+                            "wsMB":  3647,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  84.1,
+                            "vram":  7637,
+                            "wsMB":  3647,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  86.2,
+                            "vram":  7637,
+                            "wsMB":  3647,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  88.3,
+                            "vram":  7637,
+                            "wsMB":  3647,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  90.4,
+                            "vram":  7637,
+                            "wsMB":  3647,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  92.5,
+                            "vram":  7637,
+                            "wsMB":  3816,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  94.6,
+                            "vram":  7637,
+                            "wsMB":  4118,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  96.7,
+                            "vram":  7637,
+                            "wsMB":  4118,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  98.8,
+                            "vram":  7637,
+                            "wsMB":  4118,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  100.9,
+                            "vram":  7637,
+                            "wsMB":  4118,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  103,
+                            "vram":  7637,
+                            "wsMB":  4118,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  105.1,
+                            "vram":  7637,
+                            "wsMB":  4118,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  107.2,
+                            "vram":  7637,
+                            "wsMB":  4118,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  109.3,
+                            "vram":  7637,
+                            "wsMB":  4118,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  111.4,
+                            "vram":  7637,
+                            "wsMB":  4118,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  113.5,
+                            "vram":  7637,
+                            "wsMB":  4595,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  115.6,
+                            "vram":  7633,
+                            "wsMB":  4595,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  117.7,
+                            "vram":  7632,
+                            "wsMB":  4595,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  119.8,
+                            "vram":  7635,
+                            "wsMB":  4595,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  121.9,
+                            "vram":  7635,
+                            "wsMB":  4595,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  124,
+                            "vram":  7635,
+                            "wsMB":  4595,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  126.1,
+                            "vram":  7635,
+                            "wsMB":  4595,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  128.2,
+                            "vram":  7635,
+                            "wsMB":  4595,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  130.3,
+                            "vram":  7635,
+                            "wsMB":  4595,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  132.4,
+                            "vram":  7635,
+                            "wsMB":  4595,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  134.5,
+                            "vram":  7635,
+                            "wsMB":  4595,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  136.6,
+                            "vram":  7635,
+                            "wsMB":  4595,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  138.7,
+                            "vram":  7635,
+                            "wsMB":  4595,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  140.8,
+                            "vram":  7635,
+                            "wsMB":  4595,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  142.9,
+                            "vram":  7635,
+                            "wsMB":  4595,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  145,
+                            "vram":  7635,
+                            "wsMB":  4595,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  147.1,
+                            "vram":  7635,
+                            "wsMB":  5094,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  149.2,
+                            "vram":  7635,
+                            "wsMB":  5094,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  151.3,
+                            "vram":  7635,
+                            "wsMB":  36,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  153.4,
+                            "vram":  7635,
+                            "wsMB":  36,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  155.5,
+                            "vram":  7635,
+                            "wsMB":  60,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  157.6,
+                            "vram":  7635,
+                            "wsMB":  60,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  159.7,
+                            "vram":  7635,
+                            "wsMB":  60,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  161.8,
+                            "vram":  7635,
+                            "wsMB":  60,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  163.9,
+                            "vram":  7635,
+                            "wsMB":  60,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  166,
+                            "vram":  7636,
+                            "wsMB":  61,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  168.1,
+                            "vram":  7635,
+                            "wsMB":  61,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  170.2,
+                            "vram":  7635,
+                            "wsMB":  10,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  172.3,
+                            "vram":  7635,
+                            "wsMB":  11,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  174.4,
+                            "vram":  7642,
+                            "wsMB":  67,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  176.5,
+                            "vram":  7639,
+                            "wsMB":  68,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  178.6,
+                            "vram":  7582,
+                            "wsMB":  68,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  180.7,
+                            "vram":  7633,
+                            "wsMB":  909,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  182.8,
+                            "vram":  7635,
+                            "wsMB":  910,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  184.9,
+                            "vram":  7635,
+                            "wsMB":  892,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  187,
+                            "vram":  7635,
+                            "wsMB":  861,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  189.1,
+                            "vram":  7635,
+                            "wsMB":  855,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  191.2,
+                            "vram":  7635,
+                            "wsMB":  856,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  193.3,
+                            "vram":  7632,
+                            "wsMB":  855,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  195.4,
+                            "vram":  7632,
+                            "wsMB":  855,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  197.5,
+                            "vram":  7632,
+                            "wsMB":  855,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  199.6,
+                            "vram":  7632,
+                            "wsMB":  855,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  201.7,
+                            "vram":  7632,
+                            "wsMB":  856,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  203.8,
+                            "vram":  7632,
+                            "wsMB":  856,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  205.9,
+                            "vram":  7632,
+                            "wsMB":  856,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  208,
+                            "vram":  7632,
+                            "wsMB":  856,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  210.1,
+                            "vram":  7632,
+                            "wsMB":  856,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  212.2,
+                            "vram":  7632,
+                            "wsMB":  856,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  214.3,
+                            "vram":  7632,
+                            "wsMB":  856,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  216.4,
+                            "vram":  7632,
+                            "wsMB":  856,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  218.5,
+                            "vram":  7632,
+                            "wsMB":  856,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  220.6,
+                            "vram":  7632,
+                            "wsMB":  856,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  222.7,
+                            "vram":  7632,
+                            "wsMB":  857,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  224.8,
+                            "vram":  7635,
+                            "wsMB":  857,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  226.9,
+                            "vram":  7635,
+                            "wsMB":  857,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  229,
+                            "vram":  7635,
+                            "wsMB":  857,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  231,
+                            "vram":  7635,
+                            "wsMB":  857,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  233.1,
+                            "vram":  7635,
+                            "wsMB":  1383,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  235.2,
+                            "vram":  7635,
+                            "wsMB":  1383,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  237.3,
+                            "vram":  7635,
+                            "wsMB":  1383,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  239.4,
+                            "vram":  7635,
+                            "wsMB":  1383,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  241.5,
+                            "vram":  7635,
+                            "wsMB":  1383,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  243.6,
+                            "vram":  7635,
+                            "wsMB":  1383,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  245.7,
+                            "vram":  7635,
+                            "wsMB":  1384,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  247.8,
+                            "vram":  7635,
+                            "wsMB":  1384,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  249.9,
+                            "vram":  7635,
+                            "wsMB":  1384,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  252,
+                            "vram":  7635,
+                            "wsMB":  1384,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  254.1,
+                            "vram":  7632,
+                            "wsMB":  1384,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  256.2,
+                            "vram":  7635,
+                            "wsMB":  1384,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  258.3,
+                            "vram":  7635,
+                            "wsMB":  1384,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  260.4,
+                            "vram":  7635,
+                            "wsMB":  1384,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  262.5,
+                            "vram":  7635,
+                            "wsMB":  1384,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  264.6,
+                            "vram":  7635,
+                            "wsMB":  1384,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  266.7,
+                            "vram":  7635,
+                            "wsMB":  1384,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  268.8,
+                            "vram":  7635,
+                            "wsMB":  1384,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  270.9,
+                            "vram":  7635,
+                            "wsMB":  1384,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  273,
+                            "vram":  7635,
+                            "wsMB":  1385,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  275.1,
+                            "vram":  7742,
+                            "wsMB":  1897,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  277.2,
+                            "vram":  7731,
+                            "wsMB":  1900,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  279.3,
+                            "vram":  7751,
+                            "wsMB":  1900,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  281.4,
+                            "vram":  7747,
+                            "wsMB":  1956,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  283.5,
+                            "vram":  7645,
+                            "wsMB":  1956,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  285.6,
+                            "vram":  7642,
+                            "wsMB":  1956,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  287.8,
+                            "vram":  7642,
+                            "wsMB":  1956,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  289.9,
+                            "vram":  7642,
+                            "wsMB":  1956,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  292,
+                            "vram":  7642,
+                            "wsMB":  1956,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  294.1,
+                            "vram":  7642,
+                            "wsMB":  1956,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  296.3,
+                            "vram":  7658,
+                            "wsMB":  1959,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  298.4,
+                            "vram":  7658,
+                            "wsMB":  1959,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  300.5,
+                            "vram":  7725,
+                            "wsMB":  1958,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  302.7,
+                            "vram":  7661,
+                            "wsMB":  1959,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  304.8,
+                            "vram":  7658,
+                            "wsMB":  1959,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  306.9,
+                            "vram":  7658,
+                            "wsMB":  1959,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  309.1,
+                            "vram":  7658,
+                            "wsMB":  1959,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  311.2,
+                            "vram":  7755,
+                            "wsMB":  1959,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  313.3,
+                            "vram":  7734,
+                            "wsMB":  1959,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  315.5,
+                            "vram":  7725,
+                            "wsMB":  1959,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  317.6,
+                            "vram":  7743,
+                            "wsMB":  1959,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  319.7,
+                            "vram":  7736,
+                            "wsMB":  1959,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  321.8,
+                            "vram":  7695,
+                            "wsMB":  1959,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  324,
+                            "vram":  7647,
+                            "wsMB":  1959,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  326.1,
+                            "vram":  7753,
+                            "wsMB":  1959,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  328.2,
+                            "vram":  7752,
+                            "wsMB":  1959,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  330.3,
+                            "vram":  7729,
+                            "wsMB":  2133,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  332.5,
+                            "vram":  7693,
+                            "wsMB":  2432,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  334.6,
+                            "vram":  7712,
+                            "wsMB":  2432,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  336.7,
+                            "vram":  7661,
+                            "wsMB":  2432,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  338.9,
+                            "vram":  7715,
+                            "wsMB":  2432,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  341,
+                            "vram":  7688,
+                            "wsMB":  2435,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  343.1,
+                            "vram":  7609,
+                            "wsMB":  2435,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  345.2,
+                            "vram":  7609,
+                            "wsMB":  2435,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  347.3,
+                            "vram":  7561,
+                            "wsMB":  2435,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  349.4,
+                            "vram":  7561,
+                            "wsMB":  2435,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  351.5,
+                            "vram":  7559,
+                            "wsMB":  2436,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  353.6,
+                            "vram":  7559,
+                            "wsMB":  2436,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  355.7,
+                            "vram":  7559,
+                            "wsMB":  2436,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  357.8,
+                            "vram":  7559,
+                            "wsMB":  2436,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  359.9,
+                            "vram":  7559,
+                            "wsMB":  2436,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  362,
+                            "vram":  7562,
+                            "wsMB":  2436,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  364.1,
+                            "vram":  7562,
+                            "wsMB":  2436,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  366.2,
+                            "vram":  7562,
+                            "wsMB":  2428,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  368.3,
+                            "vram":  7562,
+                            "wsMB":  2384,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  370.4,
+                            "vram":  7562,
+                            "wsMB":  2364,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  372.5,
+                            "vram":  7561,
+                            "wsMB":  2364,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  374.6,
+                            "vram":  7559,
+                            "wsMB":  2866,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  376.7,
+                            "vram":  7559,
+                            "wsMB":  2866,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  378.8,
+                            "vram":  7559,
+                            "wsMB":  2866,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  380.9,
+                            "vram":  7559,
+                            "wsMB":  2866,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  382.9,
+                            "vram":  7559,
+                            "wsMB":  2866,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  385.1,
+                            "vram":  7578,
+                            "wsMB":  2867,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  387.1,
+                            "vram":  7578,
+                            "wsMB":  2867,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  389.2,
+                            "vram":  7578,
+                            "wsMB":  2867,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  391.4,
+                            "vram":  7578,
+                            "wsMB":  3342,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  393.4,
+                            "vram":  7575,
+                            "wsMB":  3342,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  395.5,
+                            "vram":  7578,
+                            "wsMB":  3342,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  397.6,
+                            "vram":  7578,
+                            "wsMB":  3342,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  399.7,
+                            "vram":  7578,
+                            "wsMB":  3342,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  401.9,
+                            "vram":  7578,
+                            "wsMB":  3342,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  404,
+                            "vram":  7578,
+                            "wsMB":  3342,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  406.1,
+                            "vram":  7578,
+                            "wsMB":  3342,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        },
+                        {
+                            "t":  408.2,
+                            "vram":  7578,
+                            "wsMB":  3342,
+                            "PSComputerName":  "localhost",
+                            "RunspaceId":  "fb1d4b90-b9ed-481e-8e6a-4250ed3ddaa5",
+                            "PSShowComputerName":  false
+                        }
+                    ]
+}

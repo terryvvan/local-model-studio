@@ -1,0 +1,128 @@
+﻿[
+    {
+        "value":  "1-text                 wall    5.5s | prompt    68 tok @ 116.0 t/s | gen   79 tok @  16.0 t/s",
+        "cfg":  "min-tokens 1024 + default batch"
+    },
+    {
+        "label":  "1-text",
+        "wall":  5.5,
+        "ptok":  68,
+        "ptps":  116.0,
+        "gtok":  79,
+        "gtps":  16.0,
+        "head":  "17 times 23 is 391.",
+        "cfg":  "min-tokens 1024 + default batch"
+    },
+    {
+        "value":  "2-text+image           wall  109.4s | prompt  4145 tok @  41.5 t/s | gen  104 tok @  10.1 t/s",
+        "cfg":  "min-tokens 1024 + default batch"
+    },
+    {
+        "label":  "2-text+image",
+        "wall":  109.4,
+        "ptok":  4145,
+        "ptps":  41.5,
+        "gtok":  104,
+        "gtps":  10.1,
+        "head":  "This image is an abstract digital wallpaper featuring smooth, flowing blue shapes that resemble curved petals or ribbons, with gradients ranging from bright cyan highlights to deep blue shadows.",
+        "cfg":  "min-tokens 1024 + default batch"
+    },
+    {
+        "value":  "3-text-after           wall    6.3s | prompt    68 tok @  54.2 t/s | gen   66 tok @  11.8 t/s",
+        "cfg":  "min-tokens 1024 + default batch"
+    },
+    {
+        "label":  "3-text-after",
+        "wall":  6.3,
+        "ptok":  68,
+        "ptps":  54.2,
+        "gtok":  66,
+        "gtps":  11.8,
+        "head":  "12 times 12 is 144.",
+        "cfg":  "min-tokens 1024 + default batch"
+    },
+    {
+        "value":  "1-text                 wall    7.9s | prompt    68 tok @  91.4 t/s | gen   70 tok @   9.6 t/s",
+        "cfg":  "min-tokens 256"
+    },
+    {
+        "label":  "1-text",
+        "wall":  7.9,
+        "ptok":  68,
+        "ptps":  91.4,
+        "gtok":  70,
+        "gtps":  9.6,
+        "head":  "17 times 23 is 391.",
+        "cfg":  "min-tokens 256"
+    },
+    {
+        "value":  "2-text+image           wall  133.9s | prompt  4145 tok @  33.2 t/s | gen  100 tok @  10.1 t/s",
+        "cfg":  "min-tokens 256"
+    },
+    {
+        "label":  "2-text+image",
+        "wall":  133.9,
+        "ptok":  4145,
+        "ptps":  33.2,
+        "gtok":  100,
+        "gtps":  10.1,
+        "head":  "This image is an abstract digital wallpaper featuring smooth, flowing curved shapes in varying shades of blue, with bright cyan highlights and deep blue shadows creating a sense of depth.",
+        "cfg":  "min-tokens 256"
+    },
+    {
+        "value":  "3-text-after           wall    7.6s | prompt    68 tok @  51.8 t/s | gen   63 tok @   9.4 t/s",
+        "cfg":  "min-tokens 256"
+    },
+    {
+        "label":  "3-text-after",
+        "wall":  7.6,
+        "ptok":  68,
+        "ptps":  51.8,
+        "gtok":  63,
+        "gtps":  9.4,
+        "head":  "12 times 12 is 144.",
+        "cfg":  "min-tokens 256"
+    },
+    {
+        "value":  "1-text                 wall    4.3s | prompt    68 tok @ 130.5 t/s | gen   69 tok @  18.0 t/s",
+        "cfg":  "min-tokens 256 + big batch"
+    },
+    {
+        "label":  "1-text",
+        "wall":  4.3,
+        "ptok":  68,
+        "ptps":  130.5,
+        "gtok":  69,
+        "gtps":  18.0,
+        "head":  "17 times 23 is 391.",
+        "cfg":  "min-tokens 256 + big batch"
+    },
+    {
+        "value":  "2-text+image           wall   82.8s | prompt  4145 tok @  54.0 t/s | gen  114 tok @  17.4 t/s",
+        "cfg":  "min-tokens 256 + big batch"
+    },
+    {
+        "label":  "2-text+image",
+        "wall":  82.8,
+        "ptok":  4145,
+        "ptps":  54.0,
+        "gtok":  114,
+        "gtps":  17.4,
+        "head":  "This image is an abstract digital wallpaper featuring smooth, flowing blue shapes with curved, petal-like forms and gradients ranging from bright cyan highlights to deep blue shadows.",
+        "cfg":  "min-tokens 256 + big batch"
+    },
+    {
+        "value":  "3-text-after           wall    4.4s | prompt    68 tok @  58.9 t/s | gen   64 tok @  18.0 t/s",
+        "cfg":  "min-tokens 256 + big batch"
+    },
+    {
+        "label":  "3-text-after",
+        "wall":  4.4,
+        "ptok":  68,
+        "ptps":  58.9,
+        "gtok":  64,
+        "gtps":  18.0,
+        "head":  "12 times 12 is 144.",
+        "cfg":  "min-tokens 256 + big batch"
+    }
+]

@@ -1,0 +1,60 @@
+0.00.149.615 W DEPRECATED: --mmap and --no-mmap are deprecated. use --load-mode mmap instead
+0.00.149.849 I cmn  common_param: common_params_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+0.00.150.107 W srv  llama_server: -----------------
+0.00.150.108 W srv  llama_server: CORS is set to allow all origins ('*') and no API key is set
+0.00.150.108 W srv  llama_server: this can be a security risk (cross-origin attacks)
+0.00.150.108 W srv  llama_server: more info: https://github.com/ggml-org/llama.cpp/pull/25655
+0.00.150.109 W srv  llama_server: -----------------
+0.00.156.333 I srv    load_model: loading model 'F:\v\project\dsh-test\bonsai\models\Ternary-Bonsai-2-27B-PTQ1_0.gguf'
+0.00.855.783 W common_fit_params: failed to fit params to free device memory: n_gpu_layers already set by user to 99, abort
+0.03.460.400 I cmn          init: llama threadpool init, n_threads = 16
+0.03.694.180 W load_hparams: Qwen-VL models require at minimum 1024 image tokens to function correctly on grounding tasks
+0.03.694.186 W load_hparams: if you encounter problems with accuracy, try adding --image-min-tokens 1024
+0.03.694.186 W load_hparams: more info: https://github.com/ggml-org/llama.cpp/issues/16842
+
+0.05.744.089 I srv    load_model: loaded multimodal model, 'F:\v\project\dsh-test\bonsai\models\Ternary-Bonsai-2-27B-mmproj-Q8_0.gguf'
+0.05.958.658 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 8192, kv_unified = 'false'
+0.05.967.984 I srv          init: chat template supports preserving reasoning, consider enabling it via --reasoning-preserve
+0.05.968.273 I srv  llama_server: model loaded
+0.05.968.276 I srv  llama_server: listening on http://127.0.0.1:8093
+0.06.589.766 I slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = -1
+0.06.590.199 I slot launch_slot_: id  0 | task 0 | processing task, is_child = 0
+0.10.899.043 I slot print_timing: id  0 | task 0 | prompt eval time =     521.08 ms /    68 tokens (    7.66 ms per token,   130.50 tokens per second)
+0.10.899.051 I slot print_timing: id  0 | task 0 |        eval time =    3787.73 ms /    69 tokens (   55.70 ms per token,    17.95 tokens per second)
+0.10.899.052 I slot print_timing: id  0 | task 0 |       total time =    4308.81 ms /   137 tokens
+0.10.899.052 I slot print_timing: id  0 | task 0 |    graphs reused =         68
+0.10.899.354 I slot      release: id  0 | task 0 | stop processing: n_tokens = 136, truncated = 0
+0.11.117.087 I slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = 10752216
+0.11.220.202 I slot launch_slot_: id  0 | task 72 | processing task, is_child = 0
+1.15.314.726 W find_slot: non-consecutive token position 57 after 56 for sequence 0 with 512 new tokens
+1.15.314.741 W find_slot: non-consecutive token position 57 after 57 for sequence 0 with 512 new tokens
+1.15.314.742 W find_slot: non-consecutive token position 57 after 57 for sequence 0 with 512 new tokens
+1.15.314.742 W find_slot: non-consecutive token position 57 after 57 for sequence 0 with 512 new tokens
+1.15.315.800 W find_slot: non-consecutive token position 57 after 56 for sequence 0 with 512 new tokens
+1.16.107.171 W find_slot: non-consecutive token position 57 after 57 for sequence 0 with 512 new tokens
+1.17.525.337 W find_slot: non-consecutive token position 57 after 57 for sequence 0 with 512 new tokens
+1.18.960.442 W find_slot: non-consecutive token position 57 after 57 for sequence 0 with 512 new tokens
+1.20.418.277 W find_slot: non-consecutive token position 57 after 57 for sequence 0 with 512 new tokens
+1.20.418.285 W find_slot: non-consecutive token position 57 after 57 for sequence 0 with 512 new tokens
+1.20.418.286 W find_slot: non-consecutive token position 57 after 57 for sequence 0 with 512 new tokens
+1.20.418.291 W find_slot: non-consecutive token position 57 after 57 for sequence 0 with 496 new tokens
+1.20.419.318 W find_slot: non-consecutive token position 57 after 57 for sequence 0 with 512 new tokens
+1.21.872.918 W find_slot: non-consecutive token position 57 after 57 for sequence 0 with 512 new tokens
+1.23.331.382 W find_slot: non-consecutive token position 57 after 57 for sequence 0 with 512 new tokens
+1.24.827.656 W find_slot: non-consecutive token position 57 after 57 for sequence 0 with 496 new tokens
+1.26.267.684 W find_slot: non-consecutive token position 145 after 57 for sequence 0 with 4 new tokens
+1.26.267.738 W find_slot: non-consecutive token position 145 after 57 for sequence 0 with 4 new tokens
+1.26.980.361 I slot print_timing: id  0 | task 72 | prompt processing, n_tokens =   4099, progress = 1.00, t =  75.76 s / 54.10 tokens per second
+1.32.915.571 I slot print_timing: id  0 | task 72 | n_gen =    100, tg =  17.45 t/s, tg_3s =  17.63 t/s
+1.33.718.289 I slot print_timing: id  0 | task 72 | prompt eval time =   76023.36 ms /  4103 tokens (   18.53 ms per token,    53.97 tokens per second)
+1.33.718.305 I slot print_timing: id  0 | task 72 |        eval time =    6475.94 ms /   114 tokens (   57.31 ms per token,    17.45 tokens per second)
+1.33.718.308 I slot print_timing: id  0 | task 72 |       total time =   82499.30 ms /  4217 tokens
+1.33.718.309 I slot print_timing: id  0 | task 72 |    graphs reused =        180
+1.33.718.566 I slot      release: id  0 | task 72 | stop processing: n_tokens = 4258, truncated = 0
+1.33.727.618 I slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.662 (> 0.100 thold), f_keep = 0.011
+1.34.168.974 I slot launch_slot_: id  0 | task 189 | processing task, is_child = 0
+1.38.102.204 I slot print_timing: id  0 | task 189 | prompt eval time =     441.53 ms /    26 tokens (   16.98 ms per token,    58.89 tokens per second)
+1.38.102.221 I slot print_timing: id  0 | task 189 |        eval time =    3491.72 ms /    64 tokens (   55.42 ms per token,    18.04 tokens per second)
+1.38.102.222 I slot print_timing: id  0 | task 189 |       total time =    3933.25 ms /    90 tokens
+1.38.102.223 I slot print_timing: id  0 | task 189 |    graphs reused =        242
+1.38.102.258 I slot      release: id  0 | task 189 | stop processing: n_tokens = 131, truncated = 0

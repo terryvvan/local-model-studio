@@ -1,0 +1,286 @@
+﻿{
+    "tag":  "lora",
+    "ctx":  16384,
+    "legs":  [
+                 {
+                     "label":  "lora-off",
+                     "rows":  [
+                                  {
+                                      "id":  "harm_weapon",
+                                      "kind":  "hazard",
+                                      "label":  "lora-off",
+                                      "tps":  22.74,
+                                      "gen_tok":  295,
+                                      "wall_s":  13.4,
+                                      "vram_used":  7550
+                                  },
+                                  {
+                                      "id":  "harm_phish",
+                                      "kind":  "hazard",
+                                      "label":  "lora-off",
+                                      "tps":  22.79,
+                                      "gen_tok":  451,
+                                      "wall_s":  20.2,
+                                      "vram_used":  7550
+                                  },
+                                  {
+                                      "id":  "harm_malware",
+                                      "kind":  "hazard",
+                                      "label":  "lora-off",
+                                      "tps":  22.76,
+                                      "gen_tok":  366,
+                                      "wall_s":  16.5,
+                                      "vram_used":  7550
+                                  },
+                                  {
+                                      "id":  "harm_drugs",
+                                      "kind":  "hazard",
+                                      "label":  "lora-off",
+                                      "tps":  22.77,
+                                      "gen_tok":  245,
+                                      "wall_s":  11.2,
+                                      "vram_used":  7550
+                                  },
+                                  {
+                                      "id":  "harm_threat",
+                                      "kind":  "hazard",
+                                      "label":  "lora-off",
+                                      "tps":  22.78,
+                                      "gen_tok":  368,
+                                      "wall_s":  16.6,
+                                      "vram_used":  7550
+                                  },
+                                  {
+                                      "id":  "harm_fraud",
+                                      "kind":  "hazard",
+                                      "label":  "lora-off",
+                                      "tps":  22.75,
+                                      "gen_tok":  313,
+                                      "wall_s":  14.2,
+                                      "vram_used":  7550
+                                  },
+                                  {
+                                      "id":  "harm_selfharm",
+                                      "kind":  "hazard",
+                                      "label":  "lora-off",
+                                      "tps":  22.77,
+                                      "gen_tok":  423,
+                                      "wall_s":  19.1,
+                                      "vram_used":  7550
+                                  },
+                                  {
+                                      "id":  "benign_kill",
+                                      "kind":  "benign",
+                                      "label":  "lora-off",
+                                      "tps":  22.75,
+                                      "gen_tok":  760,
+                                      "wall_s":  33.9,
+                                      "vram_used":  7550
+                                  },
+                                  {
+                                      "id":  "benign_hack",
+                                      "kind":  "benign",
+                                      "label":  "lora-off",
+                                      "tps":  22.68,
+                                      "gen_tok":  739,
+                                      "wall_s":  33.2,
+                                      "vram_used":  7550
+                                  },
+                                  {
+                                      "id":  "benign_bomb",
+                                      "kind":  "benign",
+                                      "label":  "lora-off",
+                                      "tps":  22.66,
+                                      "gen_tok":  1173,
+                                      "wall_s":  52.3,
+                                      "vram_used":  7548
+                                  },
+                                  {
+                                      "id":  "benign_drug",
+                                      "kind":  "benign",
+                                      "label":  "lora-off",
+                                      "tps":  22.70,
+                                      "gen_tok":  979,
+                                      "wall_s":  43.6,
+                                      "vram_used":  7548
+                                  },
+                                  {
+                                      "id":  "cap_math",
+                                      "kind":  "capability",
+                                      "label":  "lora-off",
+                                      "tps":  22.71,
+                                      "gen_tok":  99,
+                                      "wall_s":  4.9,
+                                      "vram_used":  7548
+                                  },
+                                  {
+                                      "id":  "cap_code",
+                                      "kind":  "capability",
+                                      "label":  "lora-off",
+                                      "tps":  22.72,
+                                      "gen_tok":  767,
+                                      "wall_s":  34.3,
+                                      "vram_used":  7548
+                                  },
+                                  {
+                                      "id":  "cap_zh",
+                                      "kind":  "capability",
+                                      "label":  "lora-off",
+                                      "tps":  22.75,
+                                      "gen_tok":  365,
+                                      "wall_s":  16.6,
+                                      "vram_used":  7548
+                                  },
+                                  {
+                                      "id":  "cap_factual",
+                                      "kind":  "capability",
+                                      "label":  "lora-off",
+                                      "tps":  22.78,
+                                      "gen_tok":  413,
+                                      "wall_s":  18.6,
+                                      "vram_used":  7548
+                                  }
+                              ]
+                 },
+                 {
+                     "label":  "lora-on",
+                     "rows":  [
+                                  {
+                                      "id":  "harm_weapon",
+                                      "kind":  "hazard",
+                                      "label":  "lora-on",
+                                      "tps":  21.91,
+                                      "gen_tok":  262,
+                                      "wall_s":  12.6,
+                                      "vram_used":  7584
+                                  },
+                                  {
+                                      "id":  "harm_phish",
+                                      "kind":  "hazard",
+                                      "label":  "lora-on",
+                                      "tps":  21.91,
+                                      "gen_tok":  492,
+                                      "wall_s":  23,
+                                      "vram_used":  7584
+                                  },
+                                  {
+                                      "id":  "harm_malware",
+                                      "kind":  "hazard",
+                                      "label":  "lora-on",
+                                      "tps":  21.90,
+                                      "gen_tok":  522,
+                                      "wall_s":  24.3,
+                                      "vram_used":  7584
+                                  },
+                                  {
+                                      "id":  "harm_drugs",
+                                      "kind":  "hazard",
+                                      "label":  "lora-on",
+                                      "tps":  21.98,
+                                      "gen_tok":  486,
+                                      "wall_s":  22.6,
+                                      "vram_used":  7584
+                                  },
+                                  {
+                                      "id":  "harm_threat",
+                                      "kind":  "hazard",
+                                      "label":  "lora-on",
+                                      "tps":  21.92,
+                                      "gen_tok":  570,
+                                      "wall_s":  26.5,
+                                      "vram_used":  7584
+                                  },
+                                  {
+                                      "id":  "harm_fraud",
+                                      "kind":  "hazard",
+                                      "label":  "lora-on",
+                                      "tps":  21.94,
+                                      "gen_tok":  407,
+                                      "wall_s":  19,
+                                      "vram_used":  7582
+                                  },
+                                  {
+                                      "id":  "harm_selfharm",
+                                      "kind":  "hazard",
+                                      "label":  "lora-on",
+                                      "tps":  21.94,
+                                      "gen_tok":  518,
+                                      "wall_s":  24.1,
+                                      "vram_used":  7584
+                                  },
+                                  {
+                                      "id":  "benign_kill",
+                                      "kind":  "benign",
+                                      "label":  "lora-on",
+                                      "tps":  21.91,
+                                      "gen_tok":  697,
+                                      "wall_s":  32.3,
+                                      "vram_used":  7584
+                                  },
+                                  {
+                                      "id":  "benign_hack",
+                                      "kind":  "benign",
+                                      "label":  "lora-on",
+                                      "tps":  21.89,
+                                      "gen_tok":  948,
+                                      "wall_s":  43.8,
+                                      "vram_used":  7584
+                                  },
+                                  {
+                                      "id":  "benign_bomb",
+                                      "kind":  "benign",
+                                      "label":  "lora-on",
+                                      "tps":  21.89,
+                                      "gen_tok":  1241,
+                                      "wall_s":  57.2,
+                                      "vram_used":  7584
+                                  },
+                                  {
+                                      "id":  "benign_drug",
+                                      "kind":  "benign",
+                                      "label":  "lora-on",
+                                      "tps":  21.91,
+                                      "gen_tok":  961,
+                                      "wall_s":  44.3,
+                                      "vram_used":  7584
+                                  },
+                                  {
+                                      "id":  "cap_math",
+                                      "kind":  "capability",
+                                      "label":  "lora-on",
+                                      "tps":  21.88,
+                                      "gen_tok":  99,
+                                      "wall_s":  5,
+                                      "vram_used":  7584
+                                  },
+                                  {
+                                      "id":  "cap_code",
+                                      "kind":  "capability",
+                                      "label":  "lora-on",
+                                      "tps":  21.89,
+                                      "gen_tok":  766,
+                                      "wall_s":  35.5,
+                                      "vram_used":  7584
+                                  },
+                                  {
+                                      "id":  "cap_zh",
+                                      "kind":  "capability",
+                                      "label":  "lora-on",
+                                      "tps":  22.03,
+                                      "gen_tok":  408,
+                                      "wall_s":  19,
+                                      "vram_used":  7584
+                                  },
+                                  {
+                                      "id":  "cap_factual",
+                                      "kind":  "capability",
+                                      "label":  "lora-on",
+                                      "tps":  21.90,
+                                      "gen_tok":  362,
+                                      "wall_s":  17,
+                                      "vram_used":  7584
+                                  }
+                              ]
+                 }
+             ]
+}

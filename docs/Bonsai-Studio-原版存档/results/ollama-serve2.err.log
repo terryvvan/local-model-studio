@@ -1,0 +1,65 @@
+time=2026-10-07T19:21:06.455+08:00 level=INFO source=routes.go:1802 msg="server config" env="map[CUDA_VISIBLE_DEVICES:0 GGML_VK_VISIBLE_DEVICES: GPU_DEVICE_ORDINAL: HIP_VISIBLE_DEVICES: HSA_OVERRIDE_GFX_VERSION: HTTPS_PROXY: HTTP_PROXY: NO_PROXY: OLLAMA_CONTEXT_LENGTH:0 OLLAMA_DEBUG:INFO OLLAMA_DEBUG_LOG_REQUESTS:false OLLAMA_EDITOR: OLLAMA_FLASH_ATTENTION:false OLLAMA_GPU_OVERHEAD:0 OLLAMA_HOST:http://127.0.0.1:11434 OLLAMA_KEEP_ALIVE:5m0s OLLAMA_KV_CACHE_TYPE: OLLAMA_LLM_LIBRARY: OLLAMA_LOAD_TIMEOUT:5m0s OLLAMA_MAX_LOADED_MODELS:0 OLLAMA_MAX_QUEUE:512 OLLAMA_MODELS:C:\\Users\\LEGION\\.ollama\\models OLLAMA_MULTIUSER_CACHE:false OLLAMA_NEW_ENGINE:false OLLAMA_NOHISTORY:false OLLAMA_NOPRUNE:false OLLAMA_NO_CLOUD:false OLLAMA_NUM_PARALLEL:1 OLLAMA_ORIGINS:[http://localhost https://localhost http://localhost:* https://localhost:* http://127.0.0.1 https://127.0.0.1 http://127.0.0.1:* https://127.0.0.1:* http://0.0.0.0 https://0.0.0.0 http://0.0.0.0:* https://0.0.0.0:* app://* file://* tauri://* vscode-webview://* vscode-file://*] OLLAMA_REMOTES:[ollama.com] OLLAMA_SCHED_SPREAD:false OLLAMA_VULKAN:false ROCR_VISIBLE_DEVICES:]"
+time=2026-10-07T19:21:06.472+08:00 level=INFO source=routes.go:1804 msg="Ollama cloud disabled: false"
+time=2026-10-07T19:21:06.475+08:00 level=INFO source=images.go:517 msg="total blobs: 0"
+time=2026-10-07T19:21:06.476+08:00 level=INFO source=images.go:524 msg="total unused blobs removed: 0"
+time=2026-10-07T19:21:06.478+08:00 level=INFO source=routes.go:1864 msg="Listening on 127.0.0.1:11434 (version 0.23.2)"
+time=2026-10-07T19:21:06.482+08:00 level=INFO source=runner.go:67 msg="discovering available GPUs..."
+time=2026-10-07T19:21:06.496+08:00 level=WARN source=runner.go:536 msg="user overrode visible devices" CUDA_VISIBLE_DEVICES=0
+time=2026-10-07T19:21:06.496+08:00 level=WARN source=runner.go:540 msg="if GPUs are not correctly discovered, unset and try again"
+time=2026-10-07T19:21:06.496+08:00 level=INFO source=runner.go:106 msg="experimental Vulkan support disabled.  To enable, set OLLAMA_VULKAN=1"
+time=2026-10-07T19:21:06.501+08:00 level=INFO source=server.go:433 msg="starting runner" cmd="C:\\Users\\LEGION\\AppData\\Local\\Programs\\Ollama\\ollama.exe runner --ollama-engine --port 55480"
+time=2026-10-07T19:21:07.196+08:00 level=INFO source=model_recommendations.go:177 msg="model recommendations cache sleep scheduled" wait=3h20m49.316832792s consecutive_failures=0
+time=2026-10-07T19:21:07.400+08:00 level=INFO source=server.go:433 msg="starting runner" cmd="C:\\Users\\LEGION\\AppData\\Local\\Programs\\Ollama\\ollama.exe runner --ollama-engine --port 55523"
+time=2026-10-07T19:21:08.165+08:00 level=INFO source=server.go:433 msg="starting runner" cmd="C:\\Users\\LEGION\\AppData\\Local\\Programs\\Ollama\\ollama.exe runner --ollama-engine --port 55550"
+time=2026-10-07T19:21:08.544+08:00 level=INFO source=server.go:433 msg="starting runner" cmd="C:\\Users\\LEGION\\AppData\\Local\\Programs\\Ollama\\ollama.exe runner --ollama-engine --port 55572"
+time=2026-10-07T19:21:08.544+08:00 level=INFO source=server.go:433 msg="starting runner" cmd="C:\\Users\\LEGION\\AppData\\Local\\Programs\\Ollama\\ollama.exe runner --ollama-engine --port 55573"
+time=2026-10-07T19:21:08.943+08:00 level=INFO source=types.go:42 msg="inference compute" id=GPU-c46799c5-48e9-1af7-8257-7ab589ee6a07 filter_id="" library=CUDA compute=8.9 name=CUDA0 description="NVIDIA GeForce RTX 4060 Laptop GPU" libdirs=ollama,cuda_v13 driver=13.4 pci_id=0000:01:00.0 type=discrete total="8.0 GiB" available="6.5 GiB"
+time=2026-10-07T19:21:08.943+08:00 level=INFO source=routes.go:1914 msg="vram-based default context" total_vram="8.0 GiB" default_num_ctx=4096
+time=2026-10-07T19:21:09.505+08:00 level=INFO source=server.go:433 msg="starting runner" cmd="C:\\Users\\LEGION\\AppData\\Local\\Programs\\Ollama\\ollama.exe runner --ollama-engine --port 55622"
+time=2026-10-07T19:21:09.829+08:00 level=INFO source=cpu_windows.go:148 msg=packages count=1
+time=2026-10-07T19:21:09.830+08:00 level=INFO source=cpu_windows.go:195 msg="" package=0 cores=16 efficiency=0 threads=32
+time=2026-10-07T19:21:09.922+08:00 level=INFO source=server.go:259 msg="enabling flash attention"
+time=2026-10-07T19:21:09.924+08:00 level=INFO source=server.go:433 msg="starting runner" cmd="C:\\Users\\LEGION\\AppData\\Local\\Programs\\Ollama\\ollama.exe runner --ollama-engine --model C:\\Users\\LEGION\\.ollama\\models\\blobs\\sha256-53107f530aa52eb00912263ab1ee29bd199261c87cd7b4ad4ca1318c1fe33ee3 --port 55643"
+time=2026-10-07T19:21:09.950+08:00 level=INFO source=sched.go:484 msg="system memory" total="15.7 GiB" free="7.2 GiB" free_swap="3.5 GiB"
+time=2026-10-07T19:21:09.950+08:00 level=INFO source=sched.go:491 msg="gpu memory" id=GPU-c46799c5-48e9-1af7-8257-7ab589ee6a07 library=CUDA available="6.0 GiB" free="6.5 GiB" minimum="457.0 MiB" overhead="0 B"
+time=2026-10-07T19:21:09.950+08:00 level=INFO source=server.go:792 msg="loading model" "model layers"=65 requested=-1
+time=2026-10-07T19:21:10.128+08:00 level=INFO source=runner.go:1450 msg="starting ollama engine"
+time=2026-10-07T19:21:10.144+08:00 level=INFO source=runner.go:1485 msg="Server listening on 127.0.0.1:55643"
+time=2026-10-07T19:21:10.147+08:00 level=INFO source=runner.go:1297 msg=load request="{Operation:fit LoraPath:[] Parallel:1 BatchSize:512 FlashAttention:Enabled KvSize:8192 KvCacheType: NumThreads:16 GPULayers:65[ID:GPU-c46799c5-48e9-1af7-8257-7ab589ee6a07 Layers:65(0..64)] MultiUserCache:false ProjectorPath: MainGPU:0 UseMmap:false}"
+time=2026-10-07T19:21:10.180+08:00 level=INFO source=ggml.go:144 msg="" architecture=qwen35 file_type=unknown name=Hf description="" num_tensors=851 num_key_values=50
+load_backend: loaded CPU backend from C:\Users\LEGION\AppData\Local\Programs\Ollama\lib\ollama\ggml-cpu-icelake.dll
+ggml_cuda_init: GGML_CUDA_FORCE_MMQ:    no
+ggml_cuda_init: GGML_CUDA_FORCE_CUBLAS: no
+ggml_cuda_init: found 1 CUDA devices:
+  Device 0: NVIDIA GeForce RTX 4060 Laptop GPU, compute capability 8.9, VMM: yes, ID: GPU-c46799c5-48e9-1af7-8257-7ab589ee6a07
+load_backend: loaded CUDA backend from C:\Users\LEGION\AppData\Local\Programs\Ollama\lib\ollama\cuda_v13\ggml-cuda.dll
+time=2026-10-07T19:21:10.273+08:00 level=INFO source=ggml.go:104 msg=system CPU.0.SSE3=1 CPU.0.SSSE3=1 CPU.0.AVX=1 CPU.0.AVX2=1 CPU.0.F16C=1 CPU.0.FMA=1 CPU.0.BMI2=1 CPU.0.AVX512=1 CPU.0.AVX512_VBMI=1 CPU.0.AVX512_VNNI=1 CPU.0.LLAMAFILE=1 CPU.1.LLAMAFILE=1 CUDA.0.ARCHS=750,800,860,870,890,900,1000,1030,1100,1200,1210 CUDA.0.USE_GRAPHS=1 CUDA.0.PEER_MAX_BATCH_SIZE=128 compiler=cgo(clang)
+ggml.c:1676: GGML_ASSERT(type >= 0 && type < GGML_TYPE_COUNT) failed
+time=2026-10-07T19:21:10.382+08:00 level=ERROR source=server.go:1240 msg="do load request" error="Post \"http://127.0.0.1:55643/load\": read tcp 127.0.0.1:55662->127.0.0.1:55643: wsarecv: An existing connection was forcibly closed by the remote host."
+time=2026-10-07T19:21:10.383+08:00 level=ERROR source=server.go:1240 msg="do load request" error="Post \"http://127.0.0.1:55643/load\": dial tcp 127.0.0.1:55643: connectex: No connection could be made because the target machine actively refused it."
+time=2026-10-07T19:21:10.383+08:00 level=INFO source=sched.go:511 msg="Load failed" model=C:\Users\LEGION\.ollama\models\blobs\sha256-53107f530aa52eb00912263ab1ee29bd199261c87cd7b4ad4ca1318c1fe33ee3 error="model failed to load, this may be due to resource limitations or an internal error, check ollama server logs for details"
+time=2026-10-07T19:21:10.403+08:00 level=ERROR source=server.go:316 msg="llama runner terminated" error="exit status 1"
+time=2026-10-07T19:21:10.574+08:00 level=INFO source=server.go:433 msg="starting runner" cmd="C:\\Users\\LEGION\\AppData\\Local\\Programs\\Ollama\\ollama.exe runner --ollama-engine --port 55664"
+time=2026-10-07T19:21:10.888+08:00 level=INFO source=cpu_windows.go:148 msg=packages count=1
+time=2026-10-07T19:21:10.889+08:00 level=INFO source=cpu_windows.go:195 msg="" package=0 cores=16 efficiency=0 threads=32
+time=2026-10-07T19:21:10.980+08:00 level=INFO source=server.go:259 msg="enabling flash attention"
+time=2026-10-07T19:21:10.983+08:00 level=INFO source=server.go:433 msg="starting runner" cmd="C:\\Users\\LEGION\\AppData\\Local\\Programs\\Ollama\\ollama.exe runner --ollama-engine --model C:\\Users\\LEGION\\.ollama\\models\\blobs\\sha256-53107f530aa52eb00912263ab1ee29bd199261c87cd7b4ad4ca1318c1fe33ee3 --port 55684"
+time=2026-10-07T19:21:11.008+08:00 level=INFO source=sched.go:484 msg="system memory" total="15.7 GiB" free="7.2 GiB" free_swap="3.5 GiB"
+time=2026-10-07T19:21:11.008+08:00 level=INFO source=sched.go:491 msg="gpu memory" id=GPU-c46799c5-48e9-1af7-8257-7ab589ee6a07 library=CUDA available="6.0 GiB" free="6.5 GiB" minimum="457.0 MiB" overhead="0 B"
+time=2026-10-07T19:21:11.008+08:00 level=INFO source=server.go:792 msg="loading model" "model layers"=65 requested=-1
+time=2026-10-07T19:21:11.187+08:00 level=INFO source=runner.go:1450 msg="starting ollama engine"
+time=2026-10-07T19:21:11.203+08:00 level=INFO source=runner.go:1485 msg="Server listening on 127.0.0.1:55684"
+time=2026-10-07T19:21:11.206+08:00 level=INFO source=runner.go:1297 msg=load request="{Operation:fit LoraPath:[] Parallel:1 BatchSize:512 FlashAttention:Enabled KvSize:8192 KvCacheType: NumThreads:16 GPULayers:65[ID:GPU-c46799c5-48e9-1af7-8257-7ab589ee6a07 Layers:65(0..64)] MultiUserCache:false ProjectorPath: MainGPU:0 UseMmap:false}"
+time=2026-10-07T19:21:11.242+08:00 level=INFO source=ggml.go:144 msg="" architecture=qwen35 file_type=unknown name=Hf description="" num_tensors=851 num_key_values=50
+load_backend: loaded CPU backend from C:\Users\LEGION\AppData\Local\Programs\Ollama\lib\ollama\ggml-cpu-icelake.dll
+ggml_cuda_init: GGML_CUDA_FORCE_MMQ:    no
+ggml_cuda_init: GGML_CUDA_FORCE_CUBLAS: no
+ggml_cuda_init: found 1 CUDA devices:
+  Device 0: NVIDIA GeForce RTX 4060 Laptop GPU, compute capability 8.9, VMM: yes, ID: GPU-c46799c5-48e9-1af7-8257-7ab589ee6a07
+load_backend: loaded CUDA backend from C:\Users\LEGION\AppData\Local\Programs\Ollama\lib\ollama\cuda_v13\ggml-cuda.dll
+time=2026-10-07T19:21:11.341+08:00 level=INFO source=ggml.go:104 msg=system CPU.0.SSE3=1 CPU.0.SSSE3=1 CPU.0.AVX=1 CPU.0.AVX2=1 CPU.0.F16C=1 CPU.0.FMA=1 CPU.0.BMI2=1 CPU.0.AVX512=1 CPU.0.AVX512_VBMI=1 CPU.0.AVX512_VNNI=1 CPU.0.LLAMAFILE=1 CPU.1.LLAMAFILE=1 CUDA.0.ARCHS=750,800,860,870,890,900,1000,1030,1100,1200,1210 CUDA.0.USE_GRAPHS=1 CUDA.0.PEER_MAX_BATCH_SIZE=128 compiler=cgo(clang)
+ggml.c:1676: GGML_ASSERT(type >= 0 && type < GGML_TYPE_COUNT) failed
+time=2026-10-07T19:21:11.405+08:00 level=ERROR source=server.go:1240 msg="do load request" error="Post \"http://127.0.0.1:55684/load\": read tcp 127.0.0.1:55703->127.0.0.1:55684: wsarecv: An existing connection was forcibly closed by the remote host."
+time=2026-10-07T19:21:11.406+08:00 level=ERROR source=server.go:1240 msg="do load request" error="Post \"http://127.0.0.1:55684/load\": dial tcp 127.0.0.1:55684: connectex: No connection could be made because the target machine actively refused it."
+time=2026-10-07T19:21:11.406+08:00 level=INFO source=sched.go:511 msg="Load failed" model=C:\Users\LEGION\.ollama\models\blobs\sha256-53107f530aa52eb00912263ab1ee29bd199261c87cd7b4ad4ca1318c1fe33ee3 error="model failed to load, this may be due to resource limitations or an internal error, check ollama server logs for details"
+time=2026-10-07T19:21:11.426+08:00 level=ERROR source=server.go:316 msg="llama runner terminated" error="exit status 1"

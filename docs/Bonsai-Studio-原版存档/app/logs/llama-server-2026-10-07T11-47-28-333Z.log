@@ -1,0 +1,36 @@
+# F:\v\project\dsh-test\bonsai\llamacpp\bin\llama-server.exe -m F:\v\project\dsh-test\bonsai\models\Ternary-Bonsai-2-27B-PTQ1_0.gguf -ngl 99 -c 16384 -fa on -b 2048 -ub 512 -np 1 --host 127.0.0.1 --port 8110 --reasoning-effort medium -ctk f16 -ctv f16 --no-mmap --cache-ram 4096 --mmproj F:\v\project\dsh-test\bonsai\models\Ternary-Bonsai-2-27B-mmproj-Q8_0.gguf --image-min-tokens 1024 --lora-init-without-apply --lora F:\v\project\dsh-test\bonsai\lora\bonsai-abliterate-lora.gguf
+0.00.139.953 W DEPRECATED: --mmap and --no-mmap are deprecated. use --load-mode mmap instead
+0.00.140.225 I cmn  common_param: common_params_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+0.00.140.508 W srv  llama_server: -----------------
+0.00.140.512 W srv  llama_server: CORS is set to allow all origins ('*') and no API key is set
+0.00.140.512 W srv  llama_server: this can be a security risk (cross-origin attacks)
+0.00.140.513 W srv  llama_server: more info: https://github.com/ggml-org/llama.cpp/pull/25655
+0.00.140.513 W srv  llama_server: -----------------
+0.00.157.726 I srv    load_model: loading model 'F:\v\project\dsh-test\bonsai\models\Ternary-Bonsai-2-27B-PTQ1_0.gguf'
+0.00.823.169 W common_fit_params: failed to fit params to free device memory: n_gpu_layers already set by user to 99, abort
+0.02.411.816 I cmn          init: llama threadpool init, n_threads = 16
+0.04.632.130 I srv    load_model: loaded multimodal model, 'F:\v\project\dsh-test\bonsai\models\Ternary-Bonsai-2-27B-mmproj-Q8_0.gguf'
+0.05.034.328 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 16384, kv_unified = 'false'
+0.05.045.407 I srv          init: chat template supports preserving reasoning, consider enabling it via --reasoning-preserve
+0.05.045.702 I srv  llama_server: model loaded
+0.05.045.707 I srv  llama_server: listening on http://127.0.0.1:8110
+# applied lora scale 2 -> {"success":true}
+0.31.404.524 I slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = -1
+0.31.404.779 I slot launch_slot_: id  0 | task 5 | processing task, is_child = 0
+4.47.387.964 W find_slot: non-consecutive token position 21 after 20 for sequence 0 with 512 new tokens
+4.47.387.979 W find_slot: non-consecutive token position 21 after 21 for sequence 0 with 512 new tokens
+4.47.387.982 W find_slot: non-consecutive token position 21 after 21 for sequence 0 with 512 new tokens
+4.47.387.982 W find_slot: non-consecutive token position 21 after 21 for sequence 0 with 512 new tokens
+4.47.388.969 W find_slot: non-consecutive token position 21 after 20 for sequence 0 with 512 new tokens
+4.57.585.262 W find_slot: non-consecutive token position 21 after 21 for sequence 0 with 512 new tokens
+5.02.411.610 W find_slot: non-consecutive token position 21 after 21 for sequence 0 with 512 new tokens
+5.05.636.264 W find_slot: non-consecutive token position 21 after 21 for sequence 0 with 512 new tokens
+5.13.311.384 W find_slot: non-consecutive token position 21 after 21 for sequence 0 with 512 new tokens
+5.13.311.393 W find_slot: non-consecutive token position 21 after 21 for sequence 0 with 512 new tokens
+5.13.311.394 W find_slot: non-consecutive token position 21 after 21 for sequence 0 with 512 new tokens
+5.13.311.395 W find_slot: non-consecutive token position 21 after 21 for sequence 0 with 496 new tokens
+5.13.312.261 W find_slot: non-consecutive token position 21 after 21 for sequence 0 with 512 new tokens
+5.26.039.057 W find_slot: non-consecutive token position 21 after 21 for sequence 0 with 512 new tokens
+5.36.669.222 W find_slot: non-consecutive token position 21 after 21 for sequence 0 with 512 new tokens
+5.46.003.072 W find_slot: non-consecutive token position 21 after 21 for sequence 0 with 496 new tokens
+# exited with code 4294967295

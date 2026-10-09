@@ -1,0 +1,1794 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Qwen Studio</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --panel:#ffffff; --line:#e6e8ec; --line2:#eef0f3;
+    --fg:#15171c; --dim:#6b7280; --dim2:#9aa1ab;
+    --brand:#4f46e5; --brand2:#4338ca; --brand-soft:#eef0ff;
+    --ok:#0f9d58; --warn:#c2410c; --warn-soft:#fff5ed;
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--fg);
+    font-family:"Microsoft YaHei UI","Microsoft YaHei","Segoe UI",system-ui,-apple-system,sans-serif;
+    font-size:14px; line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  button,input,textarea,select{font-family:inherit;font-size:inherit;color:inherit}
+  .hidden{display:none !important}
+
+  /* ---------- 顶栏 ---------- */
+  header{
+    position:sticky; top:0; z-index:30; height:54px;
+    display:flex; align-items:center; gap:12px; padding:0 18px;
+    background:rgba(255,255,255,.88); backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .brand{display:flex;align-items:center;gap:9px;font-weight:700;letter-spacing:.2px}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px rgba(15,157,88,.15)}
+  .brand .dot.off{background:#d14343;box-shadow:0 0 0 3px rgba(209,67,67,.15)}
+  .brand .dot.wait{background:#e0a800;box-shadow:0 0 0 3px rgba(224,168,0,.15)}
+  .brand .dot.bad{background:#d14343;box-shadow:0 0 0 3px rgba(209,67,67,.15)}
+  .brand .dot.ok{background:var(--ok);box-shadow:0 0 0 3px rgba(15,157,88,.15)}
+  .brand small{font-weight:400;color:var(--dim2);font-size:12px;margin-left:2px}
+  .top-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .pill{
+    font-size:12px;color:var(--dim);background:#f1f2f5;border-radius:999px;
+    padding:4px 10px;white-space:nowrap;
+  }
+  .pill b{color:var(--fg);font-weight:600}
+
+  /* ---------- 按钮 ---------- */
+  .btn{
+    border:1px solid var(--line); background:#fff; border-radius:10px;
+    padding:7px 13px; cursor:pointer; transition:.13s; white-space:nowrap;
+  }
+  .btn:hover{background:#f3f4f7;border-color:#d8dbe1}
+  .btn:active{transform:translateY(1px)}
+  .btn.primary{
+    background:var(--brand); border-color:var(--brand); color:#fff; font-weight:600;
+  }
+  .btn.primary:hover{background:var(--brand2);border-color:var(--brand2)}
+  .btn.primary:disabled{background:#b9b9c6;border-color:#b9b9c6;cursor:not-allowed;transform:none}
+  .btn.ghost{background:transparent;border-color:transparent;color:var(--dim)}
+  .btn.ghost:hover{background:#eef0f3;color:var(--fg)}
+  .btn.sm{padding:4px 9px;font-size:12.5px;border-radius:8px}
+  .btn.danger{color:#b42318;border-color:#f0c2bc;background:#fff8f7}
+  .btn.danger:hover{background:#fee9e6}
+
+  /* ---------- 布局 ---------- */
+  main{max-width:1000px;margin:0 auto;padding:22px 18px 130px}
+  section.card{
+    background:var(--panel); border:1px solid var(--line);
+    border-radius:var(--radius); padding:18px; margin-bottom:16px;
+    box-shadow:0 1px 2px rgba(16,24,40,.03);
+  }
+  .card-title{font-weight:600;margin:0 0 12px;font-size:15px;display:flex;align-items:center;gap:8px}
+  .card-title .hint{font-weight:400;color:var(--dim2);font-size:12.5px}
+
+  /* ---------- 输入 ---------- */
+  textarea{
+    width:100%; min-height:96px; resize:vertical; padding:12px 13px;
+    border:1px solid var(--line); border-radius:12px; background:#fcfcfd;
+    outline:none; transition:.13s; line-height:1.6;
+  }
+  textarea:focus{border-color:#c3c8ff;background:#fff;box-shadow:0 0 0 3px var(--brand-soft)}
+  textarea::placeholder{color:#aeb4bd}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .spacer{flex:1}
+
+  /* ---------- 参考图 ---------- */
+  .drop{
+    border:1.5px dashed #d6dae1; border-radius:12px; background:#fbfbfc;
+    padding:14px; text-align:center; color:var(--dim); cursor:pointer;
+    transition:.13s; font-size:13px;
+  }
+  .drop:hover,.drop.over{border-color:var(--brand);background:var(--brand-soft);color:var(--brand2)}
+  .thumbs{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  .thumb{position:relative;width:78px;height:78px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:#fff}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumb button{
+    position:absolute;top:3px;right:3px;width:19px;height:19px;border-radius:50%;
+    border:none;background:rgba(20,22,28,.62);color:#fff;cursor:pointer;line-height:1;
+    font-size:13px;padding:0;
+  }
+  .thumb button:hover{background:#d14343}
+
+  /* ---------- 底部操作条 ---------- */
+  .actionbar{
+    position:fixed;bottom:0;left:0;right:0;z-index:25;
+    background:rgba(255,255,255,.92);backdrop-filter:blur(10px);
+    border-top:1px solid var(--line); padding:11px 18px;
+  }
+  .actionbar .inner{max-width:1000px;margin:0 auto;display:flex;align-items:center;gap:12px}
+  #go{min-width:170px;padding:11px 20px;font-size:15px;border-radius:12px}
+  .status-text{color:var(--dim);font-size:13px;min-width:130px}
+  .status-text b{color:var(--fg)}
+
+  /* ---------- 进度 ---------- */
+  .progress{
+    height:4px;background:#eceef2;border-radius:99px;overflow:hidden;
+    margin-top:4px;width:100%;
+  }
+  .progress i{
+    display:block;height:100%;width:30%;border-radius:99px;
+    background:linear-gradient(90deg,#818cf8,#4f46e5);
+    animation:sweep 1.25s ease-in-out infinite;
+  }
+  @keyframes sweep{0%{margin-left:-32%}100%{margin-left:102%}}
+
+  /* ---------- 高级参数 ---------- */
+  .adv-head{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+  .adv-head h3{margin:0;font-size:15px;font-weight:600}
+  .adv-head .chev{color:var(--dim2);transition:.18s;font-size:12px}
+  .adv.open .adv-head .chev{transform:rotate(90deg)}
+  .adv-body{margin-top:16px;border-top:1px solid var(--line2);padding-top:14px}
+  .presets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .preset{
+    border:1px solid var(--line);background:#fff;border-radius:10px;
+    padding:8px 12px;cursor:pointer;text-align:left;transition:.13s;
+  }
+  .preset:hover{border-color:#c3c8ff;background:var(--brand-soft)}
+  .preset.on{border-color:var(--brand);background:var(--brand-soft);box-shadow:0 0 0 1px var(--brand) inset}
+  .preset b{display:block;font-size:13.5px}
+  .preset span{font-size:11.5px;color:var(--dim)}
+
+  details.grp{border:1px solid var(--line2);border-radius:11px;margin-bottom:11px;overflow:hidden}
+  details.grp>summary{
+    cursor:pointer;padding:10px 13px;background:#fafbfc;font-weight:600;
+    font-size:13.5px;list-style:none;display:flex;align-items:center;gap:8px;
+  }
+  details.grp>summary::-webkit-details-marker{display:none}
+  details.grp>summary::before{content:"▸";color:var(--dim2);font-size:11px;transition:.15s}
+  details.grp[open]>summary::before{transform:rotate(90deg)}
+  details.grp .grp-body{padding:14px 13px 6px}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:13px}
+  .f{display:flex;flex-direction:column;gap:5px}
+  .f>label{font-size:12.5px;color:var(--dim)}
+  .f .sub{font-size:11px;color:var(--dim2)}
+  input[type=text],input[type=number],select{
+    border:1px solid var(--line);border-radius:9px;padding:7px 10px;background:#fcfcfd;
+    outline:none;transition:.13s;width:100%;
+  }
+  input:focus,select:focus{border-color:#c3c8ff;background:#fff;box-shadow:0 0 0 3px var(--brand-soft)}
+  input[type=range]{width:100%;accent-color:var(--brand)}
+  select.compact{width:auto;padding:4px 8px;font-size:12.5px;border-radius:8px}
+  .range-row{display:flex;align-items:center;gap:9px}
+  .range-row input[type=number]{width:74px;flex:none}
+  .chk{display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer}
+  .chk input{width:15px;height:15px;accent-color:var(--brand)}
+
+  /* ---------- 结果 ---------- */
+  #empty{color:var(--dim2);text-align:center;padding:44px 0;font-size:13.5px}
+  .results{display:grid;grid-template-columns:repeat(auto-fill,minmax(430px,1fr));gap:16px;align-items:start}
+  .results.single{grid-template-columns:1fr}
+  .res-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .batch{border-top:1px dashed var(--line);padding-top:13px;margin-top:16px}
+  .batch:first-child{border-top:0;padding-top:0;margin-top:0}
+  .batch.closed .results{display:none}
+  .more{align-self:flex-start;margin-top:6px}
+  .pager{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+  .pager .btn[disabled]{opacity:.4;cursor:default}
+  .batchHead{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--dim);margin-bottom:13px}
+  .batchHead .batchNo{background:#eef0ff;color:#3b3fa8;font-weight:600;padding:2px 9px;border-radius:999px}
+  .result .meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--dim);margin-bottom:9px}
+  .result .meta .seedc{font-family:Consolas,monospace;background:#f1f2f5;padding:2px 7px;border-radius:6px}
+  .result img{
+    max-width:100%;border-radius:12px;border:1px solid var(--line);display:block;
+    background:#fff;box-shadow:0 2px 10px rgba(16,24,40,.06);cursor:zoom-in;
+  }
+  .result .acts{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap}
+
+  /* ---------- 历史画廊 ---------- */
+  .hgallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(430px,1fr));gap:16px;align-items:start}
+  .hcard{border:1px solid var(--line);border-radius:14px;padding:13px 14px 14px;background:#fff;min-width:0}
+  .hcard.gone{background:#fbfbfc}
+  .hmeta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--dim);margin-bottom:9px}
+  .hmeta .batchNo{background:#eef0ff;color:#3b3fa8;font-weight:600;padding:2px 9px;border-radius:999px}
+  .hrefs{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--dim);margin-bottom:9px}
+  .hrefs img{width:52px;height:52px;object-fit:cover;border-radius:9px;border:1px solid var(--line);cursor:zoom-in;background:#fff}
+  .hrefs img.first{border-color:#98a2ff;box-shadow:0 0 0 2px #e6e8ff}
+  .hprompt{
+    font-size:12.5px;line-height:1.65;color:#374151;background:#f7f8fa;border-radius:10px;
+    padding:9px 11px;margin-bottom:10px;max-height:78px;overflow:auto;
+    white-space:pre-wrap;word-break:break-word;
+  }
+  .hprompt.dim{color:var(--dim2)}
+  .hcard .himg{
+    max-width:100%;border-radius:12px;border:1px solid var(--line);display:block;
+    background:#fff;box-shadow:0 2px 10px rgba(16,24,40,.06);cursor:zoom-in;
+  }
+  .hcard .meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;color:var(--dim);margin:9px 0 0}
+  .hcard .acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .hcard .actEdit{background:#eef0ff;border-color:#c7ccff;color:#3b3fa8;font-weight:600}
+  .hcard .actDel{color:#8a2c2c;border-color:#f0cccc}
+  .hcard .actDel:hover{background:#fdf1f1}
+  .keepbox{display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer;user-select:none}
+  .keepbox input{margin:0}
+  .gonebox{
+    font-size:12.5px;color:#7c2d12;background:var(--warn-soft);
+    border:1px solid #fcd9c2;border-radius:10px;padding:11px 12px;line-height:1.6;
+  }
+
+  /* ---------- 错误 ---------- */
+  .alert{
+    border-radius:12px;padding:13px 15px;font-size:13px;white-space:pre-wrap;
+    background:var(--warn-soft);border:1px solid #fcd9c2;color:#7c2d12;
+    word-break:break-word;
+  }
+  .alert.plain{background:#f7f8fa;border-color:var(--line);color:var(--dim)}
+
+  /* ---------- 灯箱 ---------- */
+  #lightbox{
+    position:fixed;inset:0;z-index:100;background:rgba(14,16,20,.86);
+    display:flex;align-items:center;justify-content:center;padding:28px;cursor:zoom-out;
+  }
+  #lightbox img{max-width:100%;max-height:100%;border-radius:8px;cursor:default}
+  #lightbox .lbNav{
+    position:absolute;top:50%;transform:translateY(-50%);width:52px;height:96px;
+    border:0;border-radius:12px;background:rgba(255,255,255,.10);color:#fff;
+    font-size:34px;line-height:1;cursor:pointer;transition:.15s;
+  }
+  #lightbox .lbNav:hover{background:rgba(255,255,255,.24)}
+  #lightbox .lbNav:disabled{opacity:.18;cursor:default}
+  #lbPrev{left:16px}
+  #lbNext{right:16px}
+  #lbInfo{
+    position:absolute;left:50%;bottom:16px;transform:translateX(-50%);
+    background:rgba(20,22,28,.82);color:#e9edf5;padding:7px 14px;border-radius:9px;
+    font-size:13px;white-space:nowrap;
+  }
+  #toast{
+    position:fixed;left:50%;bottom:78px;transform:translateX(-50%);z-index:120;
+    background:rgba(20,22,28,.9);color:#fff;padding:9px 16px;border-radius:10px;
+    font-size:13px;opacity:0;pointer-events:none;transition:.22s;
+  }
+  #toast.on{opacity:1}
+  /* 改过输出位置之后常驻的一条提示：图到底存哪了，不用去猜 */
+  #outDirBar{
+    margin:12px 18px -2px;padding:8px 12px;border-radius:9px;font-size:12.5px;
+    background:#eef4ff;color:#1b3a6b;border:1px solid #cfe0ff;
+  }
+  #outDirBar b{font-weight:600;word-break:break-all}
+
+  /* ---------- 抽卡数量 / 内核启动 ---------- */
+  .chips{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .chips>span.lab{font-size:13px;color:var(--dim)}
+  .chip{
+    border:1px solid var(--line);background:#fff;border-radius:999px;
+    padding:5px 14px;font-size:13px;cursor:pointer;transition:.13s;color:var(--fg);
+  }
+  .chip:hover{border-color:#c3c8ff;background:var(--brand-soft)}
+  .chip.on{border-color:var(--brand);background:var(--brand-soft);font-weight:600;
+           box-shadow:0 0 0 1px var(--brand) inset}
+  .chips .tip{font-size:12px;color:var(--dim2)}
+  #bootBar{margin-top:14px}
+  .bootbox{display:flex;align-items:center;gap:12px}
+  .spinner{
+    width:16px;height:16px;border-radius:50%;flex:0 0 auto;
+    border:2px solid #d7dae1;border-top-color:var(--brand);
+    animation:spin .9s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .bootbox .msg{font-size:13px;color:var(--dim)}
+  #btnBootRetry{margin-left:auto}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="dot wait" id="dot"></span>
+    Qwen Studio
+    <small id="ver">连接中…</small>
+  </div>
+  <div class="top-right">
+    <span class="pill" id="gpu">—</span>
+    <button class="btn ghost sm" id="btnOpenOut">打开输出文件夹</button>
+    <button class="btn ghost sm" id="btnPickOut" title="改一个地方存以后出的图">输出位置…</button>
+    <button class="btn ghost sm" id="btnQuit">退出</button>
+  </div>
+</header>
+<div id="outDirBar" class="hidden">
+  出的图存在：<b id="outDirPath"></b>
+  <button class="btn ghost sm" id="btnPickOut2" style="margin-left:10px">换一个地方</button>
+</div>
+
+<main>
+  <section class="card">
+    <h2 class="card-title">你想画什么？<span class="hint">写得越具体，出图越准</span></h2>
+    <textarea id="prompt" rows="3" placeholder="例：一只戴墨镜的柴犬趴在沙滩上，夕阳，胶片质感"></textarea>
+
+    <div class="row" style="margin-top:15px">
+      <div class="drop" id="drop" style="flex:1">
+        拖一张图片到这里，或 <u>点击选择</u> &nbsp;·&nbsp; 放了图就是改图，不放就是画新图
+      </div>
+      <input type="file" id="file" accept="image/*" multiple class="hidden">
+    </div>
+    <div class="thumbs" id="thumbs"></div>
+
+    <div class="chips" id="pickRow">
+      <span class="lab">一次画几张</span>
+      <button class="chip" data-n="1">1 张</button>
+      <button class="chip" data-n="2">2 张</button>
+      <button class="chip on" data-n="4">4 张</button>
+      <button class="chip" data-n="8">8 张</button>
+      <span class="tip" id="pickTip">同样的提示词一次出几张，挑一张满意的 —— 就是「抽卡」</span>
+    </div>
+
+    <div id="bootBar" class="hidden">
+      <div class="alert plain bootbox">
+        <span class="spinner"></span>
+        <span class="msg" id="bootMsg">正在启动绘图内核…</span>
+        <button class="btn sm ghost hidden" id="btnBootRetry">重试</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="row">
+      <button class="btn ghost sm" id="btnSample">示例描述</button>
+      <button class="btn ghost sm" id="btnAgain" title="用相同的种子和参数再画一张完全一样的">重画这张</button>
+      <button class="btn ghost sm" id="btnSelfTest" title="检查服务和模型文件是否正常，不占用显卡">环境自检</button>
+      <div class="spacer"></div>
+      <span class="pill" id="queuePill">队列空闲</span>
+    </div>
+  </section>
+
+  <section class="card" id="resultCard">
+    <div class="res-head">
+      <button class="btn sm ghost" id="toggleResults" title="折叠/展开历史区">▾ 历史</button>
+      <span class="pill hidden" id="resultCount">0 张</span>
+      <div class="spacer"></div>
+      <label class="dim keepbox hidden" id="delFilesWrap" title="勾上以后，删除历史会把输出文件夹和缓存里的图片文件一起删掉">
+        <input type="checkbox" id="delFiles"> 连图片文件一起删
+      </label>
+      <button class="btn sm ghost hidden" id="clearResults" title="删掉全部历史记录">清空历史</button>
+    </div>
+    <div id="resBody">
+      <div id="jobError" class="alert hidden" style="margin-bottom:14px"></div>
+      <div id="selfTest" class="alert plain hidden" style="margin-bottom:14px"></div>
+      <div id="empty">还没有图。上面写一句话，点「生成」。</div>
+      <div class="hgallery" id="results"></div>
+      <div class="pager hidden" id="pager">
+        <button class="btn sm ghost" id="pagePrev">‹ 上一页</button>
+        <span class="pill" id="pageInfo">1 / 1</span>
+        <button class="btn sm ghost" id="pageNext">下一页 ›</button>
+        <span class="dim" id="pageHint"></span>
+        <div class="spacer"></div>
+        <span class="dim">每页</span>
+        <select class="compact" id="pageSize">
+          <option value="0" selected>10 张</option>
+          <option value="1">20 张</option>
+          <option value="2">50 张</option>
+          <option value="3">全部</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <section class="card adv" id="adv">
+    <div class="adv-head" id="advHead">
+      <span class="chev">▶</span>
+      <h3>高级参数</h3>
+      <span class="hint">不看也完全没问题——不展开就是用下面这些默认值</span>
+    </div>
+    <div class="adv-body hidden" id="advBody">
+      <div class="presets" id="presets"></div>
+
+      <details class="grp" open>
+        <summary>速度与质量</summary>
+        <div class="grp-body">
+          <div class="grid">
+            <div class="f">
+              <label>采样步数 steps</label>
+              <div class="range-row">
+                <input type="range" id="steps_r" min="1" max="60" step="1">
+                <input type="number" id="steps" min="1" max="200">
+              </div>
+              <span class="sub" id="stepsHint"></span>
+            </div>
+            <div class="f">
+              <label>引导强度 cfg</label>
+              <div class="range-row">
+                <input type="range" id="cfg_r" min="0" max="8" step="0.1">
+                <input type="number" id="cfg" min="0" max="20" step="0.1">
+              </div>
+              <span class="sub">官方路径保持 1.0；大于 1 才会真正用到负面提示词</span>
+            </div>
+            <div class="f">
+              <label>采样器 sampler</label>
+              <select id="sampler_name"></select>
+              <span class="sub">官方路径 euler 最稳</span>
+            </div>
+            <div class="f">
+              <label>调度器 scheduler</label>
+              <select id="scheduler"></select>
+            </div>
+            <div class="f">
+              <label>降噪 denoise</label>
+              <div class="range-row">
+                <input type="range" id="denoise_r" min="0" max="1" step="0.05">
+                <input type="number" id="denoise" min="0" max="1" step="0.05">
+              </div>
+              <span class="sub">1.0 = 完全重画</span>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <details class="grp">
+        <summary>尺寸与数量</summary>
+        <div class="grp-body">
+          <div class="grid">
+            <div class="f">
+              <label>输出画幅</label>
+              <select id="canvas_mode">
+                <option value="follow" selected>跟随参考图（默认）</option>
+                <option value="origin">按原图比例·原尺寸</option>
+                <option value="scale">按原图比例·放大倍数</option>
+                <option value="area">按原图比例·指定像素</option>
+                <option value="ratio">指定比例 + 像素</option>
+                <option value="custom">自定义宽×高（可扩图）</option>
+              </select>
+              <span class="sub">改图专用：跟随参考图时，出图比例和像素都由参考图决定，下面「宽/高」不起作用。想改比例、想扩图就换成自定义。</span>
+            </div>
+            <div class="f" id="fxScale" style="display:none">
+              <label>放大倍数</label>
+              <select class="compact" id="canvas_scale">
+                <option value="0.5">×0.5（更快）</option>
+                <option value="1" selected>×1（原尺寸）</option>
+                <option value="1.5">×1.5</option>
+                <option value="2">×2</option>
+                <option value="3">×3</option>
+                <option value="4">×4</option>
+              </select>
+              <span class="sub">相对参考图的原始尺寸放大，比例不变</span>
+            </div>
+            <div class="f" id="fxPx" style="display:none">
+              <label>输出面积</label>
+              <select class="compact" id="canvas_px">
+                <option value="1048576">1MP（1024²）</option>
+                <option value="2359296">2.25MP（1536²）</option>
+                <option value="4194304" selected>4MP（2048²）</option>
+                <option value="8294400">8.3MP（2880²）</option>
+                <option value="16777216">16.7MP（4096²）</option>
+              </select>
+              <span class="sub">按参考图的比例，把总像素提到这个量级</span>
+            </div>
+            <div class="f" id="fxRatio" style="display:none">
+              <label>输出比例</label>
+              <select class="compact" id="canvas_ratio">
+                <option value="1:1" selected>1:1 方形</option>
+                <option value="4:3">4:3</option>
+                <option value="3:4">3:4 竖</option>
+                <option value="3:2">3:2</option>
+                <option value="2:3">2:3 竖</option>
+                <option value="16:9">16:9</option>
+                <option value="9:16">9:16 竖</option>
+                <option value="21:9">21:9 宽</option>
+                <option value="9:21">9:21 长竖</option>
+                <option value="4:5">4:5 竖</option>
+                <option value="5:4">5:4</option>
+              </select>
+            </div>
+            <div class="f" id="fxMp" style="display:none">
+              <label>输出像素</label>
+              <select class="compact" id="canvas_mp">
+                <option value="0.5">0.5MP</option>
+                <option value="1" selected>1MP（1024²）</option>
+                <option value="2">2MP</option>
+                <option value="4">4MP（2048²）</option>
+                <option value="8">8MP</option>
+              </select>
+            </div>
+            <div class="f" id="fCanvasW">
+              <label>宽 width</label>
+              <input type="number" id="width" min="256" max="4096" step="32">
+            </div>
+            <div class="f" id="fCanvasH">
+              <label>高 height</label>
+              <input type="number" id="height" min="256" max="4096" step="32">
+            </div>
+            <div class="f">
+              <label>一次画几张 batch</label>
+              <input type="number" id="batch_size" min="1" max="16" step="1">
+              <span class="sub">在上面「一次画几张」里点选就行，这里改也一样。8G 显存建议不超过 4</span>
+            </div>
+            <div class="f">
+              <label>参考图像素 resolution</label>
+              <input type="number" id="resolution" min="0" max="4096" step="32">
+              <span class="sub">仅改图时生效：模型「看清楚」参考图的面积预算（默认 1024²，即约 1024×1024 的边长）。它<b>不是</b>出图尺寸，改成 0 = 用参考图原始尺寸。出图大小看上面「输出画幅」。</span>
+            </div>
+          </div>
+          <div class="row" style="margin-top:12px" id="ratioRow"></div>
+          <div class="sub" id="canvasHint" style="margin-top:8px"></div>
+        </div>
+      </details>
+
+      <details class="grp">
+        <summary>随机种子</summary>
+        <div class="grp-body">
+          <div class="grid">
+            <div class="f">
+              <label class="chk"><input type="checkbox" id="randomSeed" checked> 每次随机</label>
+              <span class="sub">取消勾选后可填固定种子，复现同一张图</span>
+            </div>
+            <div class="f">
+              <label>种子 seed</label>
+              <input type="number" id="seed" min="0" value="42" disabled>
+            </div>
+            <div class="f">
+              <label>文件名前缀 prefix</label>
+              <input type="text" id="prefix" value="qwen_out">
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <details class="grp">
+        <summary>LoRA 加速</summary>
+        <div class="grp-body">
+          <div class="grid">
+            <div class="f">
+              <label class="chk"><input type="checkbox" id="use_lora"> 启用 LoRA</label>
+              <span class="sub">开启后必须把步数改成 8，否则图会糊</span>
+            </div>
+            <div class="f">
+              <label>LoRA 文件</label>
+              <select id="lora_name"></select>
+            </div>
+            <div class="f">
+              <label>LoRA 强度</label>
+              <div class="range-row">
+                <input type="range" id="lora_strength_r" min="0" max="2" step="0.05">
+                <input type="number" id="lora_strength" min="0" max="2" step="0.05">
+              </div>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <details class="grp">
+        <summary>负面提示词</summary>
+        <div class="grp-body">
+          <div class="f">
+            <label><b>系统级负面词</b>（一直生效，自动排在下面那段的<b>前面</b> · 改完自动保存）</label>
+            <textarea id="sysNegative" rows="3" placeholder="例：worst quality, low quality, blurry, watermark, extra fingers"></textarea>
+            <div class="sub" id="sysNegHint"></div>
+          </div>
+          <div class="f" style="margin-top:13px">
+            <label>不想要的内容（cfg = 1 时无效）</label>
+            <textarea id="negative" rows="2" placeholder="例：low quality, blurry, watermark"></textarea>
+          </div>
+        </div>
+      </details>
+
+      <details class="grp">
+        <summary>模型与显存（8G 卡出问题时来调这里）</summary>
+        <div class="grp-body">
+          <div class="grid">
+            <div class="f">
+              <label>主模型 diffusion model</label>
+              <select id="unet_name"></select>
+            </div>
+            <div class="f">
+              <label>主模型精度</label>
+              <select id="weight_dtype"></select>
+            </div>
+            <div class="f">
+              <label>文本编码器</label>
+              <select id="clip_name"></select>
+            </div>
+            <div class="f">
+              <label>编码器运行设备</label>
+              <select id="clip_device"></select>
+            </div>
+            <div class="f">
+              <label>VAE</label>
+              <select id="vae_name"></select>
+            </div>
+            <div class="f">
+              <label>Cache 设备</label>
+              <select id="cache_device"></select>
+              <span class="sub">改图报 aimdo memory compile error 时改成 cpu</span>
+            </div>
+            <div class="f">
+              <label>Cache 精度</label>
+              <select id="cache_dtype"></select>
+            </div>
+          </div>
+        </div>
+      </details>
+    </div>
+  </section>
+
+</main>
+
+<div class="actionbar">
+  <div class="inner">
+    <button class="btn primary" id="go">生成</button>
+    <button class="btn danger hidden" id="cancel">取消</button>
+    <div style="flex:1">
+      <div class="status-text" id="statusText">就绪</div>
+      <div class="progress hidden" id="bar"><i></i></div>
+    </div>
+  </div>
+</div>
+
+<div id="lightbox" class="hidden">
+  <button class="lbNav" id="lbPrev" title="上一张（←）">‹</button>
+  <img id="lightboxImg" alt="">
+  <button class="lbNav" id="lbNext" title="下一张（→）">›</button>
+  <div id="lbInfo"></div>
+</div>
+<div id="toast"></div>
+
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const state = { files: [], cfg: null, job: null, busy: false, lastParams: null,
+                lastSeed: null, lastGen: 0, results: [], ready: false,
+                page: 0, pageSize: 0, collapsed: false };
+
+function toast(msg, ms = 2200) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("on");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove("on"), ms);
+}
+function human(n) {
+  if (n === null || n === undefined) return "?";
+  return (n / 1024 / 1024 / 1024).toFixed(1) + " GB";
+}
+/* 历史卡片里要把提示词塞进 innerHTML：用户写的引号/尖括号必须转义，
+   否则一条含 <" 的提示词就能把整块卡片的结构搞坏。 */
+function esc(s) {
+  return String(s === null || s === undefined ? "" : s).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+async function api(path, opts) {
+  const r = await fetch(path, opts);
+  if (!r.ok) throw new Error(await r.text() || ("HTTP " + r.status));
+  return r.json();
+}
+/* 页面里出的错只会在浏览器控制台里，用户看不到、事后也查不动 —— 统一报到
+   服务端，和服务日志写在一个文件里。 */
+function reportError(msg) {
+  try {
+    fetch("/api/client-log", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ msg: String(msg).slice(0, 600) }),
+    }).catch(() => {});
+  } catch (e) { /* 报错本身不能再抛错 */ }
+}
+window.onerror = (m, src, ln, col) => { reportError(m + " @" + (src || "") + ":" + ln + ":" + col); };
+window.addEventListener("unhandledrejection", (e) => {
+  reportError("unhandledrejection: " + ((e.reason && (e.reason.stack || e.reason.message)) || e.reason));
+});
+/* 带超时的取数：本地服务偶尔会卡在一个请求上，不能让页面跟着一起卡住 */
+async function apiTimeout(path, ms) {
+  const ac = new AbortController();
+  const t = setTimeout(() => ac.abort(), ms);
+  try {
+    const r = await fetch(path, { signal: ac.signal });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return await r.json();
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+/* ---------------------------------------------------------------- 初始化 */
+async function boot() {
+  // 先问「绘图内核起来了没」：没起来就锁住生成按钮、显示进度，
+  // 起来了（或者本来就在跑）再拉配置、装界面。
+  let health = null;
+  try { health = await api("/api/health"); } catch (e) { health = null; }
+  if (!health || health.state !== "ready") {
+    showBoot(health);
+    watchHealth();
+    return;
+  }
+  hideBoot();
+  await finishBoot(health);
+}
+
+function showBoot(h) {
+  $("bootBar").classList.remove("hidden");
+  const failed = h && h.state === "failed";
+  const sp = document.querySelector("#bootBar .spinner");
+  if (sp) sp.classList.toggle("hidden", !!failed);
+  $("btnBootRetry").classList.toggle("hidden", !failed);
+  $("bootMsg").textContent = h
+    ? (h.message || "正在启动绘图内核…") +
+      (failed ? "" : "（已 " + Math.round(h.elapsed || 0) + " 秒）") +
+      (h.error ? " · " + h.error : "")
+    : "正在连接本地服务…";
+  $("ver").textContent = failed ? "内核启动失败" : "正在启动内核…";
+  $("dot").className = "dot " + (failed ? "bad" : "wait");
+  setWaiting(true);
+  $("gpu").textContent = "—";
+  $("statusText").textContent = failed ? "内核没起来，点上面的「重试」" : "正在启动绘图内核…";
+  state.ready = false;
+}
+
+function hideBoot() {
+  $("bootBar").classList.add("hidden");
+  state.ready = true;
+}
+
+/* 内核没就绪时的按钮状态：禁用生成、收起取消/进度条（那两个是给"画图中"用的） */
+function setWaiting(w) {
+  $("btnSelfTest").disabled = w;
+  $("go").disabled = w;
+  $("go").textContent = w ? "等待内核…" : "生成";
+  if (w) {
+    $("cancel").classList.add("hidden");
+    $("bar").classList.add("hidden");
+  }
+}
+
+let healthTimer = null;
+function watchHealth() {
+  if (healthTimer) return;
+  healthTimer = setInterval(async () => {
+    let h = null;
+    try { h = await api("/api/health"); } catch (e) { h = null; }
+    if (h && h.state === "ready") {
+      clearInterval(healthTimer); healthTimer = null;
+      hideBoot();
+      await finishBoot(h);
+      return;
+    }
+    showBoot(h);
+  }, 1200);
+}
+
+async function finishBoot(h) {
+  state.cfg = await api("/api/bootstrap");
+  const c = state.cfg;
+  $("ver").textContent = "ComfyUI " + (c.system.comfyui_version || "?") +
+                         " · torch " + (c.system.python || "") +
+                         " · ui " + (c.system.ui_version || "?");
+  state.comfyOut = c.system.comfy_output || "";
+  fillOutDir(c.system.output_dir);
+  fillSysNeg(c.system.sys_negative);
+  $("dot").className = "dot ok";
+  setWaiting(false);
+  fill("sampler_name", c.options.sampler_name);
+  fill("scheduler", c.options.scheduler);
+  fill("weight_dtype", c.options.weight_dtype);
+  fill("clip_device", c.options.clip_device);
+  fill("cache_device", c.options.cache_device);
+  fill("cache_dtype", c.options.cache_dtype);
+  fill("unet_name", c.available.diffusion_models);
+  fill("clip_name", c.available.text_encoders);
+  fill("vae_name", c.available.vaes);
+  fill("lora_name", c.available.loras);
+
+  $("unet_name").value = c.defaults.unet_name;
+  $("clip_name").value = c.defaults.clip_name;
+  $("vae_name").value = c.defaults.vae_name;
+  $("lora_name").value = c.defaults.lora_name;
+  $("sampler_name").value = "euler";
+  $("scheduler").value = "simple";
+
+  buildPresets();
+  buildRatios();
+  applyPreset("quality", true);
+  bindSync();
+  bindChips();
+  $("btnBootRetry").onclick = async () => {
+    $("btnBootRetry").classList.add("hidden");
+    try { await api("/api/start-env", { method: "POST", body: "{}" }); } catch (e) {}
+    showBoot({ state: "starting", message: "正在重新启动绘图内核…", elapsed: 0 });
+    watchHealth();
+  };
+
+  // 高级参数排在结果上面（用户要求），顺手把结果区做成可折叠 + 分页
+  const mainEl = document.querySelector("main");
+  mainEl.insertBefore($("adv"), $("resultCard"));
+
+  state.pageSize = 0;                    // PAGE_SIZES[0] = 每页 10 张
+  $("toggleResults").onclick = () => {
+    state.collapsed = !state.collapsed;
+    renderBatches();
+  };
+  $("pagePrev").onclick = () => { if (state.page > 0) { state.page--; renderBatches(); } };
+  $("pageNext").onclick = () => { state.page++; renderBatches(); };
+  $("pageSize").onchange = () => {
+    state.pageSize = parseInt($("pageSize").value, 10) || 0;
+    state.page = 0;
+    renderBatches();
+  };
+  $("clearResults").onclick = clearHistory;
+  renderBatches();
+  loadHistory();
+  poll();
+  setInterval(poll, 1500);
+  setTimeout(pollSelfTest, 800);
+  // 界面文件被改过就自动刷新一次（省得手动按 F5）
+  state.uiVersion = (c.system && c.system.ui_version) || "";
+  setInterval(async () => {
+    try {
+      const b = await api("/api/bootstrap");
+      const v = (b.system && b.system.ui_version) || "";
+      if (state.uiVersion && v && v !== state.uiVersion) {
+        state.uiVersion = v;
+        location.reload();
+      }
+    } catch (e) { /* 忽略 */ }
+  }, 10000);
+}
+
+/* 启动时先把服务端记住的历史读回来：刷新页面、换窗口、重启程序之后，
+   之前生成的图都还在（图走 /output/ 或 /abs 直接从输出目录读，不占显卡）。
+   服务端是权威：它那儿没有的记录，本地也要删掉——不然在别的窗口里删了历史、
+   或者点了「清空历史」，这个窗口还会一直显示着旧内容。 */
+async function loadHistory(opts) {
+  let r;
+  try { r = await apiTimeout("/api/history", 8000); } catch (e) { reportError("loadHistory: " + e.message); return; }
+  const list = (r && r.batches) || [];
+  // 每几秒就会自动对一次，内容没变就别重画（重画会闪，还会打断正在加载的图）
+  const sig = list.map((b) => b.gen + ":" + (b.images || []).length + ":" +
+                              (b.refs || []).length).join(",");
+  if (opts && opts.quiet && sig === state.histSig) return list.length;
+  state.histSig = sig;
+
+  const alive = {};
+  list.forEach((b) => {
+    alive[b.gen] = 1;
+    const rec = {
+      gen: b.gen, seed: b.seed, steps: b.steps, elapsed: b.elapsed,
+      at: b.at ? new Date(b.at * 1000) : new Date(),
+      prompt: b.prompt || "", negative: b.negative || "",
+      params: b.params || {}, seeds: b.seeds || [], refs: b.refs || [],
+      missing: !!b.missing, images: b.images || [],
+    };
+    const idx = state.results.findIndex((x) => x.gen === b.gen);
+    if (idx < 0) { state.results.push(rec); return; }
+    const cur = state.results[idx];
+    if (!cur.live) { state.results[idx] = rec; return; }
+    // 这一批是本次会话刚画出来的：图以实时那份为准，历史里才有的字段补进去
+    // （主要是参考图的本地副本地址 —— 实时那份记不到，得等 save_history_entry）。
+    if (!cur.prompt) cur.prompt = rec.prompt;
+    if (!cur.negative) cur.negative = rec.negative;
+    if (!Object.keys(cur.params || {}).length) cur.params = rec.params;
+    if (!(cur.refs || []).length && rec.refs.length) cur.refs = rec.refs;
+    if (!(cur.images || []).length && rec.images.length) cur.images = rec.images;
+  });
+
+  // 服务端已经没有的批次，本地清掉。刚画出来、save_history_entry 还没落盘的
+  // 那一批要留着（1 分钟内算新），否则会在「生成完成」和「历史写入」之间闪一下。
+  const now = Date.now();
+  const before = state.results.length;
+  state.results = state.results.filter((b) => alive[b.gen]
+    || (b.live && now - (b.at ? b.at.getTime() : 0) < 60000));
+  if (before !== state.results.length) {
+    toast("历史已同步：去掉 " + (before - state.results.length) + " 条已删除的记录");
+  }
+
+  state.results.sort((a, b) => a.gen - b.gen);
+  if (state.results.length) {
+    // 只往上抬，不往回退：lastGen 退回去会让 poll() 把已经删掉的那批又摆回界面
+    state.lastGen = Math.max(state.lastGen || 0,
+                             state.results[state.results.length - 1].gen);
+  }
+  renderBatches();
+  return list.length;
+}
+async function pollSelfTest() {
+  try {
+    const r = await api("/api/selftest");
+    if (!r.ok) {
+      const box = $("selfTest");
+      box.classList.remove("hidden");
+      box.className = "alert";
+      box.textContent = "✗ 环境自检发现问题（可点上方「环境自检」重查）\n\n" +
+        r.checks.map((c) => (c.ok ? "✓ " : "✗ ") + c.name + "：" + c.detail).join("\n");
+    }
+  } catch (e) { /* 自检失败不打扰用户 */ }
+}
+function fill(id, opts) {
+  const el = $(id);
+  el.innerHTML = "";
+  (opts || []).forEach((o) => {
+    const op = document.createElement("option");
+    op.value = o; op.textContent = o;
+    el.appendChild(op);
+  });
+}
+function buildPresets() {
+  const P = [
+    { id: "fast",     name: "快",     desc: "8 步 LoRA · 约 22 秒" },
+    { id: "quality",  name: "质量优先", desc: "25 步 · 约 43 秒" },
+    { id: "max",      name: "最精细",  desc: "40 步 · 约 70 秒" },
+    { id: "2k",       name: "2K 大图", desc: "2048×2048 25 步 · 约 4.6 分钟" },
+    { id: "2k40",     name: "2K 精细", desc: "2048×2048 40 步 · 约 7 分钟" },
+    { id: "detail",   name: "细节增强", desc: "cfg 4 让负面词生效 · 25 步 · 约 3.3 分钟" },
+  ];
+  const box = $("presets");
+  box.innerHTML = "";
+  P.forEach((p) => {
+    const b = document.createElement("button");
+    b.className = "preset"; b.dataset.p = p.id;
+    b.innerHTML = "<b>" + p.name + "</b><span>" + p.desc + "</span>";
+    b.onclick = () => { applyPreset(p.id); toast("已切到「" + p.name + "」"); };
+    box.appendChild(b);
+  });
+}
+function applyPreset(id, silent) {
+  const set = (k, v) => { const el = $(k); if (el) el.value = v; };
+  // 预设里的「尺寸」指的是出图尺寸。放了参考图时出图尺寸由「输出画幅」决定，
+  // 所以预设同时把它切到「自定义宽×高」，否则预设的尺寸数字会被静默忽略。
+  const size = (w, h) => {
+    set("width", w); set("height", h);
+    if (state.files.length > 0) { set("canvas_mode", "custom"); syncCanvas(); }
+  };
+  // 「一次画几张」现在是主界面上的一排按钮，预设不许碰它 —— 用户选了 4 张抽卡，
+  // 换个预设还得是 4 张。
+  if ($("batch_size") && !$("batch_size").value) $("batch_size").value = 4;
+  if (id === "fast") {
+    set("use_lora", true); $("use_lora").checked = true;
+    set("steps", 8); set("cfg", 1.0); size(1024, 1024);
+    set("lora_strength", 1.0);
+  } else if (id === "quality") {
+    $("use_lora").checked = false;
+    set("steps", 25); set("cfg", 1.0); size(1024, 1024);
+  } else if (id === "max") {
+    $("use_lora").checked = false;
+    set("steps", 40); set("cfg", 1.0); size(1024, 1024);
+  } else if (id === "2k") {
+    $("use_lora").checked = false;
+    set("steps", 25); set("cfg", 1.0); size(2048, 2048);
+  } else if (id === "2k40") {
+    $("use_lora").checked = false;
+    set("steps", 40); set("cfg", 1.0); size(2048, 2048);
+  } else if (id === "detail") {
+    // 「细节增强」：不动「输出画幅」，出图尺寸与参考图预算都保持默认；真正换来
+    // 下半身细节的是「把 cfg 抬到 4，让负面提示词真正开始工作」。
+    // 实测（合成全身参考图 1024×1536、同提示词、关 LoRA、euler/simple、
+    // 用「固定腿窗口 + 统一网格」这套与背景无关的指标量，否则背景会污染结论）：
+    //   A 基线 res1024/cfg1/12步 → 832×1248, 58.8s
+    //   F cfg 4.0 / 25 步       → 832×1248, 199.7s ← 腿部 lapvar ×2.09、
+    //        缝带反差 ×2.14、去趋势结构 ×2.44，是唯一肉眼能看出斜纹缝线/膝盖
+    //        椭圆结构的档（原生分辨率下确认；缩略图上看到的白边是鞋底不是光晕）
+    //   G 同 seed 但 cfg 1.0 / 25 步 → 105.5s，腿部指标 ×0.945 ⇒ 步数不是杠杆，
+    //        25 步相比 12 步几乎不涨细节（所以别指望靠加步数救细节）
+    //   res 1536 / 25 步        → 358.2s（×6.09），腿部指标反而更差，还会改变
+    //        构图（腿被拉长、鞋子偏心）⇒ 不采用
+    set("resolution", 1024);
+    $("use_lora").checked = false;
+    set("steps", 25);
+    set("sampler_name", "euler");
+    set("scheduler", "simple");
+    set("cfg", 4.0);
+    // 采样器保持官方 euler + simple：实测 dpmpp_2m/karras 在这条链路上明显更差
+    // （lapvar -34%、高频 -41%，腿发丝状、鞋子带光晕），不要换。
+    // 故意不碰「宽 × 高」和「输出画幅」：这一档靠的是让负面词生效，不是把画布撑大；
+    // 想让画面也更大，自己去点「2K 大图 / 2K 精细」。
+    // 负面词框一个字都不填：这一档只把 cfg 抬到 4，负面词写什么由用户自己决定
+    // （用户明确要求「默认留空」）。所以这里绝不能出现 neg.value = "…"，
+    // 否则用户每点一次这档就被塞进一份「默认负面词」，而他想要的正是空着。
+    if (state.files.length === 0) toast("cfg 4 已开（负面词生效）· 负面词框留空，自己填 · 想改图先放参考图");
+    else toast("cfg 4 已开 · 25 步 · 负面词框留空，填什么由你定");
+  }
+  syncRanges();
+  syncChips();
+  document.querySelectorAll(".preset").forEach((b) =>
+    b.classList.toggle("on", b.dataset.p === id));
+  state.preset = id;
+  if (!silent) updateStepsHint();
+}
+function syncChips() {
+  const n = parseInt($("batch_size").value, 10) || 1;
+  document.querySelectorAll("#pickRow .chip").forEach((c) =>
+    c.classList.toggle("on", parseInt(c.dataset.n, 10) === n));
+  const tip = $("pickTip");
+  if (tip) {
+    if (n >= 8) tip.textContent = "8 张会很吃显存，1024 尺寸下建议不超过 4 张";
+    else tip.textContent = "同样的提示词一次出几张，挑一张满意的 —— 就是「抽卡」";
+  }
+}
+/* ---------------------------------------------------------------- 输出画幅 */
+const CANVAS_MODES = {
+  follow: { fields: [] },
+  origin: { fields: [] },
+  scale:  { fields: ["fxScale"] },
+  area:   { fields: ["fxPx"] },
+  ratio:  { fields: ["fxRatio", "fxMp"] },
+  custom: { fields: [] },
+};
+function canvasMode() {
+  const el = $("canvas_mode");
+  return el ? el.value : "follow";
+}
+function syncCanvas() {
+  const mode = canvasMode();
+  const cfg = CANVAS_MODES[mode] || CANVAS_MODES.follow;
+  Object.keys(CANVAS_MODES).forEach((k) => {
+    (CANVAS_MODES[k].fields || []).forEach((id) => {
+      const el = $(id);
+      if (el) el.style.display = (k === mode) ? "" : "none";
+    });
+  });
+  // 宽/高只在「文生图」或「自定义画幅」时可编辑
+  const hasRef = state.files.length > 0;
+  const canWH = (!hasRef) || mode === "custom";
+  [["fCanvasW", "width"], ["fCanvasH", "height"]].forEach(([f, id]) => {
+    const box = $(f), el = $(id);
+    if (box) box.style.opacity = canWH ? "" : ".45";
+    if (el) el.disabled = !canWH;
+  });
+  const hint = $("canvasHint");
+  if (hint) {
+    if (!hasRef) {
+      hint.textContent = "没放参考图时是文生图：出图大小直接看上面的「宽 width」和「高 height」，「输出画幅」里选什么都无所谓。";
+    } else if (mode === "follow") {
+      hint.textContent = "当前：出图比例和像素完全由第一张参考图决定（竖屏参考图 → 竖屏出图）。想改成方形或扩图，把「输出画幅」换成「自定义宽×高」。";
+    } else if (mode === "custom") {
+      hint.textContent = "当前：出图尺寸严格等于下面的「宽 × 高」。比参考图大就是向外扩图 —— 画布和参考图差得越远，原来的内容漂移越多，先用低步数试一张再正式跑。想要 2K 就用上面的「2K 大图」预设，它会自动切到这里。";
+    } else {
+      hint.textContent = "当前：出图比例跟随参考图，像素按上面的选项换算（都是 32 的倍数）。";
+    }
+  }
+}
+$("canvas_mode").addEventListener("change", syncCanvas);
+["canvas_scale", "canvas_px", "canvas_ratio", "canvas_mp"].forEach((id) => {
+  const el = $(id);
+  if (el) el.addEventListener("change", syncCanvas);
+});
+function bindChips() {
+  document.querySelectorAll("#pickRow .chip").forEach((c) => {
+    c.onclick = () => {
+      $("batch_size").value = c.dataset.n;
+      syncChips();
+      toast("一次画 " + c.dataset.n + " 张");
+    };
+  });
+  $("batch_size").addEventListener("input", syncChips);
+}
+function buildRatios() {
+  const R = [["1:1 方形", 1, 1], ["3:2 横", 3, 2], ["2:3 竖", 2, 3],
+             ["16:9 宽屏", 16, 9], ["9:16 竖屏", 9, 16], ["4:3", 4, 3], ["3:4", 3, 4]];
+  const box = $("ratioRow");
+  box.innerHTML = '<span class="sub" style="margin-right:2px">快速比例（按当前宽度换算）：</span>';
+  R.forEach(([label, w, h]) => {
+    const b = document.createElement("button");
+    b.className = "btn sm"; b.textContent = label;
+    b.onclick = () => {
+      const W = parseInt($("width").value, 10) || 1024;
+      const H = Math.max(256, Math.round(W * h / w / 32) * 32);
+      $("height").value = H;
+      toast(W + " × " + H);
+    };
+    box.appendChild(b);
+  });
+}
+function bindSync() {
+  const pairs = [["steps", "steps_r"], ["cfg", "cfg_r"], ["denoise", "denoise_r"],
+                 ["lora_strength", "lora_strength_r"]];
+  pairs.forEach(([a, b]) => {
+    const na = $(a), nb = $(b);
+    na.addEventListener("input", () => { nb.value = na.value; if (a === "steps") updateStepsHint(); });
+    nb.addEventListener("input", () => { na.value = nb.value; });
+  });
+  $("randomSeed").addEventListener("change", (e) => {
+    $("seed").disabled = e.target.checked;
+  });
+  $("use_lora").addEventListener("change", (e) => {
+    if (e.target.checked && parseInt($("steps").value, 10) > 12) {
+      $("steps").value = 8; syncRanges(); updateStepsHint();
+      toast("已把步数改成 8（LoRA 要求）");
+    }
+  });
+  $("steps").addEventListener("input", updateStepsHint);
+  $("advHead").onclick = () => {
+    const open = $("advBody").classList.toggle("hidden");
+    $("adv").classList.toggle("open", !open);
+  };
+}
+function syncRanges() {
+  ["steps", "cfg", "denoise", "lora_strength"].forEach((k) => {
+    const n = $(k), r = $(k + "_r");
+    if (n && r) r.value = n.value;
+  });
+  updateStepsHint();
+}
+function updateStepsHint() {
+  const s = parseInt($("steps").value, 10);
+  const lora = $("use_lora").checked;
+  let t;
+  if (lora) t = s === 8 ? "✓ 与 LoRA 匹配" : "⚠ 开了 LoRA 建议 8 步";
+  else t = s <= 12 ? "步数偏低，可能糊" : (s >= 40 ? "很慢但最细" : "✓ 正常范围");
+  $("stepsHint").textContent = t;
+}
+
+/* ---------------------------------------------------------------- 参考图 */
+$("drop").onclick = () => $("file").click();
+$("file").onchange = (e) => addFiles([...e.target.files]);
+["dragenter", "dragover"].forEach((ev) => $("drop").addEventListener(ev, (e) => {
+  e.preventDefault(); $("drop").classList.add("over");
+}));
+["dragleave", "drop"].forEach((ev) => $("drop").addEventListener(ev, (e) => {
+  e.preventDefault(); $("drop").classList.remove("over");
+}));
+$("drop").addEventListener("drop", (e) => addFiles([...e.dataTransfer.files]));
+document.addEventListener("paste", (e) => {
+  const items = [...(e.clipboardData?.items || [])].filter((i) => i.type.startsWith("image/"));
+  if (items.length) addFiles(items.map((i) => i.getAsFile()));
+});
+function addFiles(files) {
+  files.filter((f) => f && f.type.startsWith("image/")).forEach((f) => {
+    const rd = new FileReader();
+    rd.onload = () => {
+      const rec = { name: f.name, data: rd.result };
+      state.files.push(rec);
+      renderThumbs();
+      // 顺带量一下原始像素，方便后端按比例算画幅（读不出来也不影响）
+      const im = new Image();
+      im.onload = () => { rec.w = im.naturalWidth; rec.h = im.naturalHeight; syncCanvas(); };
+      im.src = rd.result;
+    };
+    rd.readAsDataURL(f);
+  });
+}
+function renderThumbs() {
+  const box = $("thumbs");
+  box.innerHTML = "";
+  state.files.forEach((f, i) => {
+    const d = document.createElement("div");
+    d.className = "thumb";
+    d.innerHTML = '<img src="' + f.data + '" alt="">';
+    const b = document.createElement("button");
+    b.textContent = "×";
+    b.title = "移除";
+    b.onclick = () => { state.files.splice(i, 1); renderThumbs(); };
+    d.appendChild(b);
+    box.appendChild(d);
+  });
+  syncCanvas();
+}
+
+/* ---------------------------------------------------------------- 生成 */
+$("go").onclick = generate;
+// Ctrl+Enter 直接出图（不用去点底部按钮），Enter 在输入框里换行
+document.addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+    e.preventDefault();
+    if (!$("go").disabled) generate();
+  }
+});
+$("btnAgain").onclick = () => {
+  if (!state.lastParams) return toast("还没有画过图");
+  Object.entries(state.lastParams).forEach(([k, v]) => {
+    const el = $(k);
+    if (!el) return;
+    if (el.type === "checkbox") el.checked = !!v; else el.value = v;
+  });
+  syncRanges();
+  generate();
+};
+$("btnSample").onclick = () => {
+  $("prompt").value = "a cozy Japanese kissaten cafe corner at golden hour, warm " +
+    "afternoon light streaming through tall windows onto a dark walnut table, " +
+    "a glass cup of iced latte, a slice of strawberry shortcake on a small white " +
+    "plate, an open sketchbook with a fountain pen, dust motes in the light, " +
+    "shot on 50mm lens, shallow depth of field, kodak portra film look, no text";
+};
+$("btnSelfTest").onclick = async () => {
+  const box = $("selfTest");
+  box.classList.remove("hidden");
+  box.className = "alert plain";
+  box.textContent = "正在检查…";
+  try {
+    const r = await api("/api/selftest");
+    box.className = "alert" + (r.ok ? " plain" : "");
+    box.textContent = (r.ok ? "✓ 一切正常\n\n" : "✗ 发现问题\n\n") +
+      r.checks.map((c) => (c.ok ? "✓ " : "✗ ") + c.name + "：" + c.detail).join("\n");
+    if (!r.ok) toast("自检发现问题，看结果卡片里的说明");
+  } catch (e) {
+    box.className = "alert";
+    box.textContent = "自检失败：" + e.message;
+  }
+};
+$("btnOpenOut").onclick = () => {
+  api("/api/open-path", { method: "POST", headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ kind: "folder" }) })
+    .then((r) => toast("已打开输出文件夹：" + (r.path || "")))
+    .catch((e) => toast("打不开：" + e.message));
+};
+
+/* ---------- 改输出位置 ---------- */
+/* ComfyUI 的存图目录写死在它自己那边，改不了，所以是 studio 出一张就往这里搬
+   一张。选择框没法在服务端弹（嵌入式 Python 没有 tkinter），走 PowerShell。 */
+function fillOutDir(dir) {
+  if (!dir) return;
+  state.outDir = dir;
+  $("outDirPath").textContent = dir;
+  // 和默认位置（ComfyUI 自己的 output）一样就不用占地方了
+  const isDefault = state.comfyOut && dir.toLowerCase() === state.comfyOut.toLowerCase();
+  $("outDirBar").classList.toggle("hidden", !!isDefault);
+}
+async function pickOutputDir() {
+  toast("请在打开的窗口里选一个文件夹…", 6000);
+  let r;
+  try {
+    r = await api("/api/pick-output-dir", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+  } catch (e) { toast("改不了输出位置：" + (e.message || e), 4200); return; }
+  if (!r || !r.ok) { toast("改不了输出位置：" + ((r && r.error) || "未知错误"), 4200); return; }
+  if (r.cancelled) { toast("没有改，还是 " + r.dir); return; }
+  fillOutDir(r.dir);
+  toast("以后出的图都存到 " + r.dir, 3600);
+}
+$("btnPickOut").onclick = pickOutputDir;
+$("btnPickOut2").onclick = pickOutputDir;
+
+/* ---------- 系统级负面词 ---------- */
+/* 这段一直生效，后端会把它拼在下面「不想要的内容」前面再发给 ComfyUI。
+   存服务端（settings.json），所以重启、换窗口、命令行入口都还在。 */
+let sysNegTimer = 0;
+let sysNegSaved = null;          // 上次存进服务端的值，没变就不重复发请求
+function sysNegCombined() {
+  const out = [];
+  [($("sysNegative") || {}).value, ($("negative") || {}).value].forEach((s) => {
+    s = (s || "").trim().replace(/^[,\s]+|[,\s]+$/g, "");
+    if (s) out.push(s);
+  });
+  return out.join(", ");
+}
+function updateSysNegHint() {
+  const el = $("sysNegHint");
+  if (!el) return;
+  const n = (($("sysNegative") || {}).value || "").trim().length;
+  el.textContent = sysNegCombined()
+    ? "本次实际发送：" + sysNegCombined()
+    : "留空 = 不加系统级负面词（下面那段照常生效）";
+  el.style.color = n ? "" : "var(--dim2)";
+}
+function fillSysNeg(v) {
+  const el = $("sysNegative");
+  if (!el) return;
+  el.value = v || "";
+  sysNegSaved = el.value;
+  updateSysNegHint();
+}
+async function saveSysNeg() {
+  const el = $("sysNegative");
+  if (!el) return;
+  const v = el.value || "";
+  if (v === sysNegSaved) return;          // 没改过，别白发一次请求
+  try {
+    const r = await api("/api/sys-negative", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sys_negative: v }),
+    });
+    if (!r || !r.ok) throw new Error((r && r.error) || "未知错误");
+    sysNegSaved = v;
+    toast(v.trim() ? "系统级负面词已保存（" + v.trim().length + " 字，一直生效）" : "系统级负面词已清空", 2600);
+  } catch (e) {
+    toast("系统级负面词没存上：" + (e.message || e), 4200);
+  }
+}
+(function bindSysNeg() {
+  const el = $("sysNegative");
+  if (!el) return;
+  el.addEventListener("input", () => {
+    updateSysNegHint();
+    clearTimeout(sysNegTimer);
+    // 打字停下来 700 毫秒才存，不然每敲一个键都往硬盘写一次
+    sysNegTimer = setTimeout(saveSysNeg, 700);
+  });
+  el.addEventListener("blur", () => { clearTimeout(sysNegTimer); saveSysNeg(); });
+  const un = $("negative");
+  if (un) un.addEventListener("input", updateSysNegHint);
+})();
+
+$("btnQuit").onclick = async () => {
+  if (!confirm("退出 Qwen Studio？（ComfyUI 会继续在后台运行）")) return;
+  try { await api("/api/quit", { method: "POST", body: "{}" }); } catch (e) {}
+  window.close();
+  document.body.innerHTML =
+    '<div style="padding:60px;text-align:center;color:#6b7280;font-family:sans-serif">' +
+    '已退出。关掉这个窗口即可。</div>';
+};
+$("cancel").onclick = async () => {
+  try { await api("/api/cancel", { method: "POST", body: "{}" }); toast("已取消"); }
+  catch (e) { toast("取消失败"); }
+};
+
+function collectParams() {
+  const num = (id, dflt) => {
+    const v = parseInt($(id).value, 10);
+    return isNaN(v) ? dflt : v;
+  };
+  const flt = (id, dflt) => {
+    const v = parseFloat($(id).value);
+    return isNaN(v) ? dflt : v;
+  };
+  const f0 = state.files[0] || {};
+  return {
+    prompt: $("prompt").value.trim(),
+    negative: $("negative").value,
+    steps: num("steps", 25),
+    cfg: flt("cfg", 1.0),
+    denoise: flt("denoise", 1.0),
+    sampler_name: $("sampler_name").value,
+    scheduler: $("scheduler").value,
+    width: num("width", 1024),
+    height: num("height", 1024),
+    batch_size: num("batch_size", 1),
+    resolution: num("resolution", 1024),
+    canvas_mode: canvasMode(),
+    canvas_scale: flt("canvas_scale", 1.0),
+    canvas_px: num("canvas_px", 4194304),
+    canvas_ratio: $("canvas_ratio").value,
+    canvas_mp: flt("canvas_mp", 1.0),
+    ref_w: f0.w || 0,
+    ref_h: f0.h || 0,
+    seed: $("randomSeed").checked ? "random" : num("seed", 42),
+    prefix: $("prefix").value || "qwen_out",
+    use_lora: $("use_lora").checked,
+    lora_name: $("lora_name").value,
+    lora_strength: flt("lora_strength", 1.0),
+    unet_name: $("unet_name").value,
+    weight_dtype: $("weight_dtype").value,
+    clip_name: $("clip_name").value,
+    clip_device: $("clip_device").value,
+    vae_name: $("vae_name").value,
+    cache_device: $("cache_device").value,
+    cache_dtype: $("cache_dtype").value,
+  };
+}
+
+async function generate() {
+  const p = collectParams();
+  if (!p.prompt) { toast("先写一句你想画什么"); $("prompt").focus(); return; }
+  if (p.use_lora && p.steps !== 8) { toast("开了 LoRA 请把步数设为 8"); return; }
+  if (p.batch_size > 8) {
+    toast("一次画 " + p.batch_size + " 张会很吃显存，建议先试 " +
+          Math.min(8, p.batch_size) + " 张以内");
+  }
+  state.lastParams = p;
+  setBusy(true);
+  $("jobError").classList.add("hidden");
+  try {
+    const r = await api("/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ params: p, files: state.files }),
+    });
+    if (!r.ok) { toast(r.error || "提交失败"); setBusy(false); return; }
+    $("empty").classList.add("hidden");
+    // 新一批结果到达时会被放到最上面（placeBatch 按 gen 合并，这里只是标记一下批次号）
+    state.lastGen = -1;
+  } catch (e) {
+    toast("提交失败: " + e.message);
+    setBusy(false);
+  }
+}
+
+function setBusy(b) {
+  state.busy = b;
+  $("go").disabled = b || !state.ready;
+  $("go").textContent = b ? "正在生成…" : (state.ready ? "生成" : "等待内核…");
+  $("cancel").classList.toggle("hidden", !b);
+  $("bar").classList.toggle("hidden", !b || !state.ready);
+}
+
+/* ---------------------------------------------------------------- 轮询 */
+let pollBusy = false;
+async function poll() {
+  if (!state.ready) return;          // 内核还没起来，交给 watchHealth 管
+  if (pollBusy) return;              // 上一次还没回来就跳过，绝不堆请求
+  pollBusy = true;
+  let s;
+  try { s = await apiTimeout("/api/status", 8000); }
+  catch (e) { pollBusy = false; return; }
+  pollBusy = false;
+  if (!s) return;
+  if (s.error === "__timeout__") return;
+  state.job = s;
+
+  // 服务端换了界面文件（程序更新过）而这个窗口一直开着：这里 1.5 秒问一次
+  // 状态，顺手就能发现自己是个旧页面，直接刷新——以前要用户自己关掉重开，
+  // 于是「明明改了怎么还是老样子」的误会都出在这儿。
+  if (s.ui && state.uiVersion && s.ui !== state.uiVersion) {
+    state.uiVersion = s.ui;
+    location.reload();
+    return;
+  }
+  // 每 ~6 秒对一次历史：在另一个窗口里删了记录/清空了历史，这边跟着更新
+  state.syncTick = (state.syncTick || 0) + 1;
+  if (state.syncTick % 4 === 0) loadHistory({ quiet: true }).catch(() => {});
+
+  const dot = $("dot");
+  dot.className = "dot " + (s.error && s.state === "error" && s.queue_running === 0
+    ? "off" : "ok");
+
+  const d = (s.sys && s.sys.vram_total)
+    ? "显存 " + human(s.sys.vram_free) + " 空闲 / " + human(s.sys.vram_total)
+    : "—";
+  $("gpu").textContent = d;
+  $("queuePill").textContent = s.queue_running
+    ? "正在运行 " + s.queue_running + " 个任务"
+    : (s.queue_pending ? "排队中 " + s.queue_pending : "队列空闲");
+
+  if (s.state === "running") {
+    setBusy(true);
+    const jt = s.job_total > 1 ? "（第 " + s.job_index + "/" + s.job_total + " 张）" : "";
+    $("statusText").innerHTML = "正在生成…" + jt + " <b>" + (s.elapsed || 0).toFixed(0) + "s</b>";
+  } else if (s.state === "done") {
+    setBusy(false);
+    $("statusText").innerHTML = "完成，用时 <b>" + (s.elapsed || 0).toFixed(1) + "s</b>";
+    if (s.images && s.images.length) {
+      state.lastSeed = s.seed;
+      placeBatch(s, s.images);       // 同一批重复下发时 placeBatch 自己会去重
+    }
+  } else if (s.state === "error") {
+    setBusy(false);
+    $("statusText").textContent = "出错了";
+    $("jobError").classList.remove("hidden");
+    $("jobError").textContent = s.error || "未知错误";
+    s.state = "idle";
+  } else {
+    setBusy(false);
+  }
+}
+
+/* 历史区按「一张图 = 一条」平铺：最新生成的排最前面，一页默认 10 张，翻页
+   翻的是整个历史（以前分页只作用在最新那一批上，一批只有 4 张，所以「下一页」
+   永远是灰的，看着像个摆设）。每条卡片带自己的提示词、参考图和「编辑」按钮。 */
+const PAGE_SIZES = [10, 20, 50, 0];   // 0 = 全部（索引 0 = 默认每页 10 张）
+
+/* 「编辑」要回填的参数（和后端 HIST_PARAM_KEYS 对齐）。prompt / negative
+   单独处理，因为它们是文本框不是参数。 */
+const HIST_PARAM_KEYS = ["steps", "cfg", "denoise", "sampler_name", "scheduler",
+  "resolution", "canvas_mode", "canvas_scale", "canvas_px", "canvas_ratio",
+  "canvas_mp", "width", "height", "use_lora", "lora_name", "lora_strength"];
+
+/* 把 state.results（按批号组织的原始历史）摊成一条条图片记录，最新在前。 */
+function gallery() {
+  const items = [];
+  state.results.forEach((b) => {
+    const ims = (b.images || []).slice().reverse();
+    if (!ims.length) { items.push({ batch: b, im: null }); return; }
+    ims.forEach((im) => items.push({ batch: b, im: im }));
+  });
+  items.sort((x, y) => (y.batch.gen || 0) - (x.batch.gen || 0));  // 稳定排序
+  return items;
+}
+
+function placeBatch(s, images) {
+  if (!images || !images.length) return;
+  // 刚生成完的这批还没写进服务端历史，先把界面上的提示词/参数挂上去；
+  // 参考图要等 save_history_entry 落下本地副本后由 loadHistory 补（见下）。
+  const lp = state.lastParams || {};
+  const keep = {};
+  HIST_PARAM_KEYS.forEach((k) => { if (lp[k] !== undefined) keep[k] = lp[k]; });
+  const rec = {
+    gen: s.gen, seed: s.seed, steps: s.total_steps,
+    elapsed: s.elapsed, at: s.at ? new Date(s.at * 1000) : new Date(),
+    images: images.slice(), live: true,
+    prompt: lp.prompt || "", negative: lp.negative || "",
+    params: keep, seeds: [], refs: [], missing: false,
+  };
+  const idx = state.results.findIndex((b) => b.gen === rec.gen);
+  if (idx >= 0 && state.results[idx].live) {
+    // 这一批已经是实时结果了（轮询每次都会把同一批重复发下来），别再画一遍。
+    return;
+  }
+  if (idx >= 0) {
+    // 同一批号的对象是从服务端历史里读回来的（刷新页面时先铺上的那张，可能是
+    // 输出目录被清空后的旧记录）。实时结果才是真的，直接整条替换掉——以前这里
+    // 只在「新的图更多」时才更新，于是刚生成完的那一批正好和刚读回来的历史同号，
+    // 就被挡掉了：界面看起来完全没反应，其实图已经出来了。
+    state.results[idx] = rec;
+  } else {
+    state.results.push(rec);
+  }
+  $("empty").classList.add("hidden");
+  state.page = 0;                      // 新结果总是从第一页看起
+  renderBatches();
+  // 等服务端把这一批写进历史后补一次参考图（本地副本的地址比 data URL 小得多）
+  setTimeout(() => { loadHistory().catch(() => {}); }, 2500);
+}
+
+function renderBatches() {
+  const box = $("results");
+  const items = gallery();
+  const per = PAGE_SIZES[state.pageSize] || 0;
+  const size = per > 0 ? per : Math.max(1, items.length);
+  const pages = Math.max(1, Math.ceil(items.length / size));
+  state.page = Math.min(Math.max(0, state.page), pages - 1);
+  const from = state.page * size;
+  const slice = items.slice(from, from + size);
+
+  box.innerHTML = "";
+  slice.forEach((it) => box.appendChild(historyNode(it.batch, it.im)));
+
+  const total = items.length;
+  $("pager").classList.toggle("hidden", total === 0);
+  $("pageInfo").textContent = (state.page + 1) + " / " + pages;
+  $("pagePrev").disabled = state.page <= 0;
+  $("pageNext").disabled = state.page >= pages - 1;
+  $("pageHint").textContent = total
+    ? "本页第 " + (from + 1) + "–" + (from + slice.length) + " 条 · 共 " + total + " 条"
+    : "";
+
+  $("resBody").classList.toggle("hidden", state.collapsed);
+  $("empty").classList.toggle("hidden", total > 0 || state.collapsed);
+  $("clearResults").classList.toggle("hidden", state.results.length === 0);
+  $("delFilesWrap").classList.toggle("hidden", state.results.length === 0);
+  $("resultCount").classList.toggle("hidden", total === 0 || !state.collapsed);
+  $("resultCount").textContent = state.results.length + " 次生成 · " + total + " 张";
+  $("toggleResults").textContent = (state.collapsed ? "▸ " : "▾ ") + "历史";
+}
+
+/* 一条历史记录 = 一张卡片：提示词 + 参考图 + 操作按钮。「编辑」会以这张图当
+   参考图（新任务的 image_1），并把提示词/参数原样回填，用户改完直接再生成。 */
+function historyNode(b, im) {
+  const d = document.createElement("div");
+  d.className = "hcard" + (im ? "" : " gone");
+
+  const at = b.at instanceof Date && !isNaN(b.at) ? b.at : null;
+  const hh = at ? at.toTimeString().slice(0, 8) : "--:--:--";
+  const dd = at ? (at.getMonth() + 1) + "/" + at.getDate() : "";
+  const pr = (b.prompt || "").trim();
+
+  let html =
+    '<div class="hmeta">' +
+      '<span class="batchNo">第 ' + esc(b.gen) + " 次</span>" +
+      "<span>" + esc(dd + " " + hh) + "</span>" +
+      "<span>seed " + esc(b.seed === undefined || b.seed === null ? "-" : b.seed) + "</span>" +
+      "<span>" + esc(b.steps || "?") + " 步</span>" +
+      "<span>" + esc((b.elapsed || 0).toFixed(1)) + "s</span>" +
+    "</div>";
+
+  const refs = b.refs || [];
+  if (refs.length) {
+    html += '<div class="hrefs"><span>参考图</span>';
+    refs.forEach((r, i) => {
+      html += '<img src="' + esc(r.url) + '" alt="" data-ref="' + i + '"' +
+              ' title="' + (i === 0 ? "编辑目标（image_1）" : "参考图 " + (i + 1)) + '">';
+    });
+    html += "</div>";
+  }
+
+  if (pr || im) {
+    html += '<div class="hprompt' + (pr ? "" : " dim") + '">' +
+            (pr ? esc(pr) : "（这条记录里没有提示词）") + "</div>";
+  }
+
+  if (im) {
+    html += '<img class="himg" src="' + esc(im.url) + '" alt="" loading="lazy">';
+    html += '<div class="meta"><span>' + esc(im.w || "?") + " × " + esc(im.h || "?") + "</span>" +
+            "<span>" + esc(((im.size || 0) / 1024).toFixed(0)) + " KB</span>" +
+            (im.cached ? '<span class="dim">原图已不在，这里是副本</span>' : "") +
+            "</div>";
+    html += '<div class="acts">' +
+      '<button class="btn sm actEdit">编辑（用这张改）</button>' +
+      '<button class="btn sm actCopy">复制图片</button>' +
+      '<button class="btn sm actFolder">在文件夹中显示</button>' +
+      '<button class="btn sm actBig">看大图</button>' +
+      '<button class="btn sm actDel">删除这张</button>' +
+      "</div>";
+  } else {
+    html += '<div class="gonebox">这一批的图片文件已经不在了（被删或被清理工具删过）。' +
+            "提示词和参数还留着，但没法拿它当参考图。</div>" +
+            '<div class="acts"><button class="btn sm actFolderOut">打开输出文件夹</button>' +
+            '<button class="btn sm actDel">删掉这条记录</button></div>';
+  }
+  d.innerHTML = html;
+
+  const img = d.querySelector(".himg");
+  if (img) {
+    img.onclick = () => showLightbox(im.url);
+    d.querySelector(".actBig").onclick = () => showLightbox(im.url);
+    d.querySelector(".actCopy").onclick = async () => {
+      try {
+        const blob = await (await fetch(im.url)).blob();
+        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+        toast("已复制到剪贴板");
+      } catch (e) { toast("复制失败：" + e.message); }
+    };
+    d.querySelector(".actFolder").onclick = () => {
+      api("/api/open-path", { method: "POST", headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ file: im.file, kind: "select" }) })
+        .then(() => toast("已在资源管理器中定位"))
+        .catch((e) => toast("打不开：" + e.message));
+    };
+    d.querySelector(".actEdit").onclick = (ev) => editFromHistory(b, im, ev.currentTarget);
+  } else {
+    d.querySelector(".actFolderOut").onclick = () => {
+      api("/api/open-path", { method: "POST", headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ kind: "folder" }) })
+        .then(() => toast("已打开输出文件夹"))
+        .catch((e) => toast("打不开：" + e.message));
+    };
+  }
+  d.querySelector(".actDel").onclick = (ev) => deleteHistory(b, im, ev.currentTarget);
+  d.querySelectorAll(".hrefs img").forEach((el) => {
+    el.onclick = () => showLightbox(refs[parseInt(el.dataset.ref, 10)].url);
+  });
+  return d;
+}
+
+/* 以历史里的一张图为参考图，接着改。 */
+async function editFromHistory(b, im, btn) {
+  if (!im) return;
+  const old = btn ? btn.textContent : "";
+  if (btn) { btn.disabled = true; btn.textContent = "正在取图…"; }
+  try {
+    const r = await fetch(im.url);
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const blob = await r.blob();
+    const nm = "history_" + b.gen + "_" + (im.name || "ref.png");
+    const file = new File([blob], nm, { type: blob.type || "image/png" });
+    // image_1 是编辑目标，所以先把当前挂着的参考图清掉，免得顺序错乱
+    state.files = [];
+    addFiles([file]);
+
+    if (b.prompt) $("prompt").value = b.prompt;
+    $("negative").value = b.negative || "";
+    updateSysNegHint();   // 系统级负面词不动，但下面这段换了，提示要跟着变
+    const p = b.params || {};
+    HIST_PARAM_KEYS.forEach((k) => {
+      if (p[k] === undefined || p[k] === null) return;
+      const el = $(k);
+      if (!el) return;
+      if (el.type === "checkbox") el.checked = !!p[k]; else el.value = p[k];
+    });
+    if ($("use_lora") && p.use_lora !== undefined) $("use_lora").checked = !!p.use_lora;
+
+    syncRanges();
+    syncChips();
+    if (typeof updateStepsHint === "function") updateStepsHint();
+    $("advBody").classList.remove("hidden");   // 展开高级参数，让用户看到回填了什么
+    $("adv").classList.add("open");
+    renderThumbs();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    toast("已把第 " + b.gen + " 次的这张图设为参考图，提示词和参数也回填了 —— 改完点生成", 4200);
+  } catch (e) {
+    toast("取图失败：" + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = old; }
+  }
+}
+
+/* 删掉历史里的一张图（或者一条没有图的记录）。
+
+   默认只删记录、不动文件：这个用户被「图自己没了」坑过一次，所以删文件必须是
+   他明确勾了「连图片文件一起删」才做的事，而不是删除记录的副作用。 */
+async function deleteHistory(b, im, btn) {
+  const del = $("delFiles");
+  const withFiles = !!(del && del.checked);
+  const what = im ? "第 " + b.gen + " 次的这张图" : "第 " + b.gen + " 次的记录";
+  const tail = withFiles
+    ? "图片文件也会一起删掉（输出文件夹里的原图和缓存里的副本），不能恢复。"
+    : "只是从历史里去掉，图片文件还留在输出文件夹里。";
+  if (!confirm("确定删除" + what + "？\n" + tail)) return;
+  const old = btn ? btn.textContent : "";
+  if (btn) { btn.disabled = true; btn.textContent = "删除中…"; }
+  try {
+    const r = await api("/api/history/delete", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ gen: b.gen, name: im ? im.name : null, files: withFiles }),
+    });
+    if (!r.ok) throw new Error(r.error || "删除失败");
+    // 本地这份也要跟着改，否则 loadHistory 会把服务端还留着的那张又补回来
+    if (im) {
+      b.images = (b.images || []).filter((x) => x.name !== im.name);
+      b.live = false;
+      if (!b.images.length) state.results = state.results.filter((x) => x.gen !== b.gen);
+    } else {
+      state.results = state.results.filter((x) => x.gen !== b.gen);
+    }
+    await loadHistory();
+    toast("已删除" + (r.files ? "，同时删掉 " + r.files + " 个文件" : ""), 3000);
+  } catch (e) {
+    toast("删除失败：" + e.message, 3600);
+    if (btn) { btn.disabled = false; btn.textContent = old; }
+  }
+}
+
+/* 清空全部历史；连不连文件一起删，看那个复选框。 */
+async function clearHistory() {
+  const n = state.results.length;
+  if (!n) return;
+  const del = $("delFiles");
+  const withFiles = !!(del && del.checked);
+  const tail = withFiles
+    ? "所有图片文件（输出文件夹里的原图 + 缓存副本）都会一起删掉，不能恢复。"
+    : "只是从历史里去掉，图片文件还留在输出文件夹里。";
+  if (!confirm("确定清空全部 " + n + " 条历史？\n" + tail)) return;
+  try {
+    const r = await api("/api/history/clear", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ files: withFiles }),
+    });
+    if (!r.ok) throw new Error(r.error || "清空失败");
+    state.results = [];
+    state.page = 0;
+    // 界面上只认服务端那份列表：loadHistory 每 ~6 秒对一次，服务端没有的本地就删掉，
+    // 所以这里清完不需要再额外「锁」什么，删掉的批次也不会自己冒回来。
+    renderBatches();
+    toast("已清空 " + (r.removed || 0) + " 条历史" +
+          (r.files ? "，删掉 " + r.files + " 个文件" : ""), 3200);
+  } catch (e) {
+    toast("清空失败：" + e.message, 3600);
+  }
+}
+
+/* ---------- 大图预览：左右翻页 ---------- */
+/* 预览时按 ← → （或点两侧的箭头）在历史里前后翻，不用退出来点下一张。
+   翻的是整个历史里所有还有图的条目，顺序和界面上看到的一致。 */
+function lbList() {
+  const out = [];
+  gallery().forEach((it) => {
+    if (!it.im || !it.im.url) return;
+    out.push({ url: it.im.url, name: it.im.name, w: it.im.w, h: it.im.h,
+               gen: it.batch.gen });
+  });
+  return out;
+}
+function renderLightbox() {
+  const n = state.lb.length;
+  const it = state.lb[state.lbIdx] || {};
+  $("lightboxImg").src = it.url;
+  const bits = [];
+  if (n > 1) bits.push("第 " + (state.lbIdx + 1) + " / " + n + " 张");
+  if (it.gen) bits.push("第 " + it.gen + " 次");
+  if (it.w) bits.push(it.w + "×" + it.h);
+  if (it.name) bits.push(it.name);
+  $("lbInfo").textContent = bits.join(" · ");
+  $("lbPrev").disabled = n < 2;
+  $("lbNext").disabled = n < 2;
+}
+function lbStep(d) {
+  const n = state.lb.length;
+  if (n < 2) return;
+  state.lbIdx = (state.lbIdx + d + n) % n;
+  renderLightbox();
+}
+function closeLightbox() {
+  $("lightbox").classList.add("hidden");
+  $("lightboxImg").src = "";
+  state.lb = [];
+  state.lbIdx = 0;
+}
+function showLightbox(url) {
+  state.lb = lbList();
+  let i = state.lb.findIndex((x) => x.url === url);
+  if (i < 0) { state.lb = [{ url: url }]; i = 0; }
+  state.lbIdx = i;
+  renderLightbox();
+  $("lightbox").classList.remove("hidden");
+}
+$("lightbox").onclick = () => closeLightbox();
+$("lightboxImg").onclick = (e) => e.stopPropagation();
+$("lbPrev").onclick = (e) => { e.stopPropagation(); lbStep(-1); };
+$("lbNext").onclick = (e) => { e.stopPropagation(); lbStep(1); };
+document.addEventListener("keydown", (e) => {
+  if ($("lightbox").classList.contains("hidden")) return;
+  if (e.key === "ArrowLeft") { e.preventDefault(); lbStep(-1); }
+  else if (e.key === "ArrowRight") { e.preventDefault(); lbStep(1); }
+  else if (e.key === "Escape") { closeLightbox(); }
+});
+
+syncCanvas();
+boot();
+</script>
+</body>
+</html>

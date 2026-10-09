@@ -1,0 +1,2557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Local Model Studio</title>
+<style>
+:root{
+  --bg:#0d1117; --bg2:#141a22; --bg3:#1b232e; --line:#242e3b; --txt:#e6edf3; --dim:#8b98a8;
+  --acc:#4c9aff; --acc2:#2f7ae5; --ok:#3fb950; --warn:#d29922; --bad:#f85149; --radius:10px;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--txt);font:14px/1.6 "Segoe UI","Microsoft YaHei",system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer;border:1px solid var(--line);background:var(--bg3);border-radius:8px;padding:7px 12px;transition:.15s}
+button:hover{border-color:var(--acc);background:#22303f}
+button.primary{background:var(--acc2);border-color:var(--acc2);color:#fff;font-weight:600}
+button.primary:hover{background:var(--acc)}
+button.danger{border-color:#5a2626;color:#ff9c95}
+button.danger:hover{background:#2a1616;border-color:var(--bad)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.mini{padding:3px 9px;font-size:12px;border-radius:6px}
+/* 「开」状态就长在按钮上（联网开关）：亮底 + 白字，不再另起一行文案说明。 */
+button.mini.on{background:var(--acc2);border-color:var(--acc2);color:#fff;font-weight:600}
+button.mini.on:hover{background:var(--acc);border-color:var(--acc)}
+input[type=text],input[type=number],select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:100%}
+input[type=range]{width:100%;accent-color:var(--acc)}
+textarea{resize:vertical}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:#2b3644;border-radius:6px}
+::-webkit-scrollbar-track{background:transparent}
+.hid{display:none !important}
+
+/* ---------- title bar ---------- */
+header{display:flex;align-items:center;gap:12px;padding:9px 16px;background:var(--bg2);border-bottom:1px solid var(--line);flex:0 0 auto;flex-wrap:wrap}
+.logo{font-weight:700;letter-spacing:.3px;white-space:nowrap}
+.logo span{color:var(--acc)}
+.status{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--dim);padding:4px 10px;background:var(--bg3);border-radius:20px;border:1px solid var(--line);white-space:nowrap;max-width:280px;overflow:hidden;text-overflow:ellipsis}
+.status.mchat{border-color:#1f4529;color:#7ee2a8}
+.status.mimage{border-color:#3a2f52;color:#c4b5fd}
+.status.mbusy{border-color:#4a3a1a;color:#e3b341}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--bad);flex:0 0 auto}
+.dot.on{background:var(--ok);box-shadow:0 0 8px #3fb95088}
+.dot.busy{background:var(--warn)}
+.spacer{flex:1}
+.metrics{display:flex;gap:14px;font-size:12.5px;color:var(--dim);flex-wrap:wrap;align-items:center}
+.metrics b{color:var(--txt);font-weight:600}
+.metrics .bar{display:inline-block;width:52px;height:6px;border-radius:4px;background:var(--bg3);border:1px solid var(--line);overflow:hidden;vertical-align:-1px}
+.metrics .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc2),var(--acc));width:0}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--bg3)}
+.seg button{border:none;border-radius:0;padding:6px 9px;background:transparent;font-size:12.5px;line-height:1.2}
+.seg button:not(:last-child){border-right:1px solid var(--line)}
+.seg button.on{background:var(--acc2);color:#fff;font-weight:600}
+.seg button.on:hover{background:var(--acc);border-color:transparent}
+.tabs{display:flex;gap:4px;background:var(--bg3);border:1px solid var(--line);border-radius:9px;padding:3px}
+.tabs button{border:none;background:transparent;border-radius:6px;padding:6px 16px;font-size:13.5px}
+.tabs button.active{background:var(--acc2);color:#fff;font-weight:600}
+.tabs button.active:hover{background:var(--acc)}
+.tabs .badge{display:inline-block;min-width:16px;padding:0 4px;margin-left:6px;border-radius:9px;background:#ffffff22;font-size:11px;font-weight:600}
+.mtps{font-size:12.5px;color:var(--dim);white-space:nowrap}
+.mtps b{color:var(--acc)}
+
+/* ---------- layout ---------- */
+main{flex:1;display:flex;min-height:0}
+.tabpane{flex:1;display:none;min-width:0;min-height:0}
+.tabpane.active{display:flex}
+#paneChat{flex-direction:column}
+/* min-height:0 必须写在每一层纵向 flex 项上：flex 项默认 min-height:auto 不肯收缩，
+ * 漏一层整条链就被内容顶高（曾经 #chatwrap h=2354 在 862 的 pane 里），#msgs 因此
+ * 永远 clientHeight==scrollHeight（不滚动），composer 被推到视口外，body 又是 overflow:hidden。 */
+#chatwrap{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--bg)}
+#msgs{flex:1;min-height:0;overflow-y:auto;padding:20px 0}
+/* 「回到最新」：只在用户往上翻历史、自动跟随停下来时才出现（见 JS 里的 STICK）。
+ * 定位在 composer 顶部之上 12px，所以 #composer 是 position:relative。 */
+#btnJump{position:absolute;right:20px;bottom:calc(100% + 12px);z-index:7;width:38px;height:38px;padding:0;display:grid;place-items:center;border-radius:50%;background:var(--bg3);color:var(--txt);box-shadow:0 6px 18px #000a}
+#btnJump:hover{background:#22303f;color:var(--acc)}
+.inner{max-width:860px;margin:0 auto;padding:0 20px}
+
+/* ---------- 会话侧边栏（左侧） ---------- */
+#side{flex:0 0 auto;width:236px;display:flex;flex-direction:column;min-height:0;background:var(--bg2);border-right:1px solid var(--line)}
+body.noside #side{display:none}
+body.tab-image #side{display:none}      /* 生图 tab 有自己的历史列，不再占一列 */
+.sidehead{padding:10px;border-bottom:1px solid var(--line);display:flex;gap:8px}
+.sidehead button{flex:1;white-space:nowrap}
+#sideList{flex:1;min-height:0;overflow-y:auto;padding:6px}
+.conv{display:flex;align-items:center;gap:6px;padding:7px 8px;border:1px solid transparent;border-radius:8px;margin-bottom:2px;cursor:pointer}
+.conv:hover{background:var(--bg3)}
+.conv.active{background:#1b2a3d;border-color:#2c4666}
+.conv .cc{flex:1;min-width:0}
+.conv .ct{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.conv .cm{font-size:11px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cdel{flex:0 0 auto;width:26px;height:26px;padding:0;display:grid;place-items:center;opacity:0;border-color:transparent;background:transparent;color:var(--dim);transition:.15s}
+.conv:hover .cdel,.cdel:focus-visible{opacity:1}
+.cdel:hover{opacity:1;color:#ff9c95;border-color:#5a2626;background:#2a1616}
+.cdel svg{display:block}
+.cnone{padding:16px 10px;color:var(--dim);font-size:12.5px;text-align:center}
+.msg{margin-bottom:18px;display:flex;gap:12px}
+.avatar{width:30px;height:30px;border-radius:8px;flex:0 0 auto;display:grid;place-items:center;font-size:13px;font-weight:700}
+.msg.user .avatar{background:#243447;color:#9dc4ff}
+.msg.ai .avatar{background:#1d3326;color:#7ee2a8}
+.msg.sys .avatar{background:#33291d;color:#e3b341}
+.msg.err .avatar{background:#2a1616;color:#ff9c95}
+.bubble{flex:1;min-width:0}
+.who{font-size:12px;color:var(--dim);margin-bottom:4px}
+.text{white-space:pre-wrap;word-wrap:break-word;overflow-wrap:anywhere}
+.text code{background:#0b0f14;border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-family:Consolas,monospace;font-size:13px}
+.text pre{background:#0b0f14;border:1px solid var(--line);border-radius:8px;padding:12px;overflow-x:auto;margin:6px 0}
+.text pre code{background:none;border:none;padding:0}
+.text b{color:#ffe9a8}
+.think{border-left:2px solid #3a4655;margin:0 0 8px;padding:2px 0 2px 12px;color:var(--dim);font-size:12.5px;white-space:pre-wrap;max-height:210px;overflow-y:auto}
+.think summary{cursor:pointer;color:#6f7d8c;font-size:12px;user-select:none}
+.imgs{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 8px}
+.imgs img{max-width:210px;max-height:170px;border-radius:8px;border:1px solid var(--line);cursor:zoom-in;display:block}
+.imgs .gen{max-width:330px;max-height:330px}
+.imgcap{font-size:11.5px;color:#5f6b7a;margin-top:4px;word-break:break-all;max-width:340px}
+.tok{font-size:11.5px;color:#5f6b7a;margin-top:6px}
+.empty{color:var(--dim);text-align:center;margin-top:9vh}
+.empty h1{font-size:21px;color:var(--txt);margin:0 0 8px}
+.empty .chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.empty .chips button{font-size:13px}
+.step{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--dim);margin:0 0 6px}
+.pbar{height:8px;border-radius:5px;background:var(--bg3);border:1px solid var(--line);overflow:hidden;margin:4px 0 8px;max-width:420px}
+.pbar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc2),var(--acc));width:0;transition:width .4s}
+.pindet i{width:34%;animation:sweep 1.6s linear infinite}
+@keyframes sweep{0%{margin-left:-34%}100%{margin-left:104%}}
+
+/* ---------- agent 工具卡片 ---------- */
+.tcard{border:1px solid var(--line);border-radius:9px;background:var(--bg2);margin:0 0 8px;max-width:680px;overflow:hidden;font-size:12.5px}
+.tcard .th{display:flex;gap:8px;align-items:center;padding:7px 10px;cursor:pointer;user-select:none}
+.tcard .th:hover{background:#182231}
+.tcard .ic{flex:0 0 auto;width:18px;text-align:center}
+.tcard .nm{font-weight:600;color:#cfe0f5;flex:0 0 auto}
+.tcard .ar{color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1 1 auto;font-family:Consolas,monospace;font-size:11.5px}
+.tcard .st{flex:0 0 auto;font-size:11.5px;color:var(--dim)}
+.tcard.run .st{color:var(--acc)}
+.tcard.ok .st{color:var(--ok)}
+.tcard.err .st,.tcard.denied .st{color:var(--bad)}
+.tcard.ask{border-color:#4a3a1a}
+.tcard.ask .st{color:var(--warn)}
+.tcard .bd{border-top:1px solid var(--line);padding:8px 10px;background:#0b0f14;max-height:340px;overflow:auto}
+.tcard .bd pre{margin:0;white-space:pre-wrap;word-break:break-word;font-family:Consolas,monospace;font-size:11.5px;color:#c8d4e0}
+.tcard .bd .lbl{color:#5f6b7a;font-size:11px;margin:7px 0 3px}
+.tcard .bd .lbl:first-child{margin-top:0}
+.tcard .bd .old{color:#ffb3ad}
+.tcard .bd .new{color:#a5e8b0}
+.tcard .acts{display:flex;gap:8px;align-items:center;padding:7px 10px;border-top:1px solid var(--line);background:#1c1710}
+.tcard .acts .warn{color:var(--warn);font-size:11.5px;margin-right:auto}
+details.src{margin:2px 0 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg2);overflow:hidden;max-width:640px}
+details.src>summary{cursor:pointer;padding:7px 11px;font-size:12.5px;color:#9fb4cc;user-select:none;list-style:none}
+details.src>summary::-webkit-details-marker{display:none}
+details.src>summary::before{content:'▸ '}
+details.src[open]>summary::before{content:'▾ '}
+.slist{padding:2px 11px 10px}
+.sitem{padding:6px 0;border-top:1px dashed #1e2732}
+.sitem .t{font-size:12.5px;color:#cfe0f5;font-weight:600}
+.sitem .t a{color:#cfe0f5;text-decoration:none}
+.sitem .t a:hover{color:var(--acc);text-decoration:underline}
+.sitem .u{font-size:11px;color:#4f7fb5;word-break:break-all}
+.sitem .s{font-size:12px;color:var(--dim);margin-top:2px}
+
+/* ---------- composer ---------- */
+#composer{flex:0 0 auto;position:relative;border-top:1px solid var(--line);background:var(--bg2);padding:10px 0 12px}
+.qbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:9px;font-size:12.5px;color:var(--dim)}
+.qbar .grp{display:flex;align-items:center;gap:6px;margin:0}
+/* Agent 关着时权限档位整组变灰（不生效，但值还留着） */
+.qbar .grp.dim{opacity:.45}
+.qbar .grpico{font-size:12px;line-height:1}
+/* 工具卡片里的「申请一次性放行」提示条 */
+.prow{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#ffd479;background:#3a2f10;border:1px solid #5c4a12;border-radius:8px;padding:6px 9px;margin:6px 0}
+.prow .ptag{font-weight:600;color:#ffe6a8}
+.drop{border:1.5px dashed transparent;border-radius:var(--radius);transition:.15s}
+.drop.over{border-color:var(--acc);background:#4c9aff14}
+.attach{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.thumb{position:relative}
+.thumb img{max-width:76px;max-height:76px;border-radius:8px;border:1px solid var(--line);display:block;object-fit:cover}
+.thumb .scaled{position:absolute;bottom:2px;left:2px;font-size:9.5px;background:#000b;border-radius:4px;padding:1px 4px;color:#8fd0ff}
+.thumb.pend{width:76px;height:76px;border:1px dashed var(--line);border-radius:8px;display:grid;place-items:center}
+#imgNote{font-size:11.5px;color:#5f6b7a;margin-bottom:6px}
+.thumb button{position:absolute;top:-7px;right:-7px;padding:0;width:20px;height:20px;border-radius:50%;line-height:1;background:var(--bad);border:none;color:#fff;font-size:13px}
+/* 文档附件：输入框上方那条文档（和图片缩略图并排），以及消息里已发出去的文档条 */
+.dthumb{position:relative;display:flex;align-items:center;gap:7px;max-width:320px;background:#151d2a;border:1px solid var(--line);border-radius:9px;padding:6px 9px}
+.dthumb .dico{font-size:16px;line-height:1}
+.dthumb .dcol{display:flex;flex-direction:column;min-width:0}
+.dthumb .dname{font-size:12px;color:#d6e2f2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:215px}
+.dthumb .dmeta{font-size:10.5px;color:#6f7d8c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:215px}
+.dthumb button{position:absolute;top:-7px;right:-7px;padding:0;width:20px;height:20px;border-radius:50%;line-height:1;background:var(--bad);border:none;color:#fff;font-size:13px}
+.dthumb.pend{opacity:.7;border-style:dashed}
+.dthumb.bad{border-color:#6b3030;background:#2a1a1a}
+.dlist{display:flex;flex-wrap:wrap;gap:7px;margin:6px 0 6px}
+.dchip{display:inline-flex;align-items:center;gap:6px;max-width:340px;background:#141c29;border:1px solid var(--line);border-radius:8px;padding:5px 9px;text-decoration:none;color:#cfe0f5;font-size:12px}
+.dchip:hover{border-color:var(--acc)}
+.dchip .dname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+.dchip .dmeta{color:#6f7d8c;font-size:10.5px;white-space:nowrap}
+.frow{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 2px}
+.row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+.row>button{flex:0 0 auto;white-space:nowrap}
+textarea#input{flex:1 1 240px;width:auto;min-width:140px;resize:none;max-height:220px;min-height:44px;padding:11px 12px}
+#btnAttach{width:44px;height:44px;padding:0;display:grid;place-items:center;color:var(--dim)}
+#btnAttach:hover{color:var(--acc)}
+#btnAttach svg{display:block}
+#btnArt,#btnStop,#btnSend{height:44px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center}
+#btnSend{min-width:78px;padding:0 18px}
+.hint{font-size:11.5px;color:#5f6b7a;margin-top:7px;display:flex;gap:14px;flex-wrap:wrap}
+
+/* ---------- 生图 ---------- */
+#paneImage{overflow:hidden}
+#genwrap{flex:1;display:flex;min-height:0}
+#genform{width:392px;flex:0 0 auto;border-right:1px solid var(--line);background:var(--bg2);display:flex;flex-direction:column;min-height:0}
+#genform .fbody{overflow-y:auto;padding:14px 16px 20px;flex:1}
+.pcard{border:1px solid var(--line);border-radius:12px;background:var(--bg);padding:12px 13px;margin-bottom:12px}
+.pcard h3{margin:0 0 9px;font-size:12.5px;color:var(--acc);letter-spacing:.4px;text-transform:uppercase}
+.pcard h3 .r{float:right;color:#8b98a8;text-transform:none;letter-spacing:0;font-weight:400;font-size:11.5px}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label.mini{display:block;font-size:12px;color:var(--dim);margin-bottom:3px}
+label.mini .v{float:right;color:var(--acc);font-variant-numeric:tabular-nums}
+.ratios{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.ratios button{font-size:12px;padding:4px 8px;border-radius:6px}
+.presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:2px}
+.presets button{display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:5px 9px;border-radius:8px;line-height:1.3;text-align:left}
+.presets button b{font-size:12px;font-weight:600}
+.presets button span{font-size:10.5px;color:var(--dim)}
+.presets button.on{border-color:var(--acc);background:#1d2c3e}
+.presets button.on b{color:#9dc7ff}
+.subhint{font-size:11.5px;color:#5f6b7a;margin-top:5px;line-height:1.5}
+details.pcard>summary{cursor:pointer;font-size:12.5px;color:var(--acc);letter-spacing:.4px;text-transform:uppercase;user-select:none;list-style:none}
+details.pcard>summary::-webkit-details-marker{display:none}
+details.pcard>summary::before{content:'▸ '}
+details.pcard[open]>summary::before{content:'▾ '}
+.selftest{font-size:11.5px;color:var(--dim);margin-top:8px;line-height:1.6;white-space:pre-wrap}
+.selftest.ok b{color:#7ee2a8}
+.selftest.bad b{color:#e3b341}
+.chk{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--dim);cursor:pointer}
+.chk input{width:auto}
+#gdbuttons{display:flex;gap:10px;padding:12px 16px;border-top:1px solid var(--line);background:var(--bg3);align-items:center;flex-wrap:wrap}
+#btnGen{min-width:150px;font-size:15px;padding:11px 16px}
+#btnCancel{min-width:86px;font-size:15px;padding:11px 14px}
+#genstatus{font-size:12px;color:var(--dim);width:100%}
+#genright{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0}
+#nowbar{display:flex;gap:10px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--bg2);flex-wrap:wrap;font-size:12.5px;color:var(--dim)}
+#history{flex:1;overflow-y:auto;padding:14px 16px 24px}
+.hgrp{margin-bottom:20px}
+.hhead{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:8px}
+.hhead .g{font-weight:700;color:var(--acc);font-size:13.5px}
+.hhead .m{font-size:12px;color:var(--dim)}
+.hhead .sp{flex:1}
+.hgrid{display:flex;gap:10px;flex-wrap:wrap}
+.hitem{width:172px;border:1px solid var(--line);border-radius:10px;background:var(--bg2);overflow:hidden;cursor:zoom-in;transition:.15s}
+.hitem:hover{border-color:var(--acc)}
+.hitem .ph{width:100%;height:172px;display:block;background:#0b0f14;object-fit:cover}
+.hitem .ph.broken{display:grid;place-items:center;color:#4b5867;font-size:11.5px;height:172px}
+img.broken{border:1px dashed #242e3b;background:#0b0f14;color:#4b5867;font-size:11.5px;display:grid;place-items:center;padding:10px;text-align:center}
+.hitem .ph.broken::after{content:'图片打不开'}
+.hitem .cap{padding:5px 7px;font-size:11px;color:#6f7d8c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hitem .acts{display:flex;gap:4px;padding:0 5px 5px}
+.hitem .acts button{font-size:11px;padding:2px 7px}
+.hprompt{font-size:12.5px;color:#9fb4cc;white-space:pre-wrap;overflow-wrap:anywhere;max-width:720px}
+.hgone{border:1px dashed #4a3a1a;border-radius:10px;padding:10px 12px;color:#e3b341;font-size:12.5px}
+#nowbox{margin-bottom:16px}
+.nowimg{max-width:340px;max-height:340px;border-radius:10px;border:1px solid var(--line);cursor:zoom-in;display:block}
+
+/* ---------- settings drawer ---------- */
+.mask{position:fixed;inset:0;background:#000a;backdrop-filter:blur(2px);display:none;z-index:50}
+.mask.show{display:block}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(720px,96vw);background:var(--bg2);border-left:1px solid var(--line);box-shadow:-24px 0 60px #000a;display:flex;flex-direction:column;transform:translateX(102%);transition:transform .2s ease;z-index:60}
+.drawer.show{transform:none}
+.drawer .dhead{display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);padding:13px 16px;font-size:15px;font-weight:600}
+.drawer .tabs2{display:flex;gap:6px;padding:0 16px 11px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.drawer .tabs2 button{border-radius:20px;padding:5px 14px;font-size:13px}
+.drawer .tabs2 button.active{background:var(--acc2);border-color:var(--acc2);color:#fff}
+.drawer .dbody{overflow-y:auto;padding:14px 16px;flex:1}
+.drawer .dfoot{display:flex;gap:10px;align-items:center;padding:12px 16px;border-top:1px solid var(--line);background:var(--bg3)}
+.pane{display:none}.pane.active{display:block}
+.drawer .grp{margin-bottom:20px}
+.drawer .grp h3{margin:0 0 10px;font-size:13px;color:var(--acc);letter-spacing:.4px;text-transform:uppercase}
+.field{display:grid;grid-template-columns:210px 1fr;gap:12px;align-items:center;padding:9px 0;border-bottom:1px dashed #1e2732}
+.field:last-child{border-bottom:none}
+.field .lab{display:flex;align-items:center;gap:6px;font-size:13px}
+.field .ctl{display:flex;align-items:center;gap:10px}
+.field .ctl .val{min-width:78px;text-align:right;color:var(--acc);font-variant-numeric:tabular-nums;font-size:13px}
+.field .ctl input[type=range]{flex:1}
+.chip{font-size:10.5px;padding:1px 6px;border-radius:4px;border:1px solid var(--line);color:var(--dim);white-space:nowrap}
+.chip.r{border-color:#4a3a1a;color:#d29922}
+.help{grid-column:2;font-size:12px;color:var(--dim);margin-top:-2px}
+.help .est{color:#7ea6d8;margin-top:3px;display:block}
+.presets{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-bottom:16px}
+.preset{border:1px solid var(--line);background:var(--bg3);border-radius:10px;padding:12px;text-align:left}
+.preset:hover{border-color:var(--acc)}
+.preset .n{font-weight:600;margin-bottom:3px}
+.preset .d{font-size:12px;color:var(--dim)}
+.preset .e{font-size:11.5px;color:#7ea6d8;margin-top:7px;line-height:1.5}
+.note{font-size:12.5px;border-radius:8px;padding:9px 12px;margin-bottom:12px;border:1px solid}
+.note.warn{background:#d2992212;border-color:#4a3a1a;color:#e3b341}
+.note.ok{background:#3fb95012;border-color:#1f4529;color:#7ee2a8}
+.note.bad{background:#f8514912;border-color:#5a2626;color:#ff9c95}
+pre.log{background:#0b0f14;border:1px solid var(--line);border-radius:8px;padding:12px;font:12px/1.5 Consolas,monospace;max-height:320px;overflow:auto;white-space:pre-wrap;margin:0}
+.tip{position:relative;display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;border:1px solid var(--line);color:var(--dim);font-size:10px;cursor:help;flex:0 0 auto}
+.tip:hover{border-color:var(--acc);color:var(--acc)}
+.tip::after{content:attr(data-tip);position:absolute;left:22px;top:-6px;width:330px;background:#0b0f14;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.6;color:var(--txt);box-shadow:0 12px 30px #000c;opacity:0;pointer-events:none;transition:.12s;z-index:60;white-space:normal;font-weight:400}
+.tip:hover::after{opacity:1}
+.spin{display:inline-block;width:11px;height:11px;border:2px solid var(--dim);border-top-color:transparent;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-1px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ---------- lightbox & toast ---------- */
+#lightbox{position:fixed;inset:0;background:#000d;backdrop-filter:blur(3px);display:none;z-index:80;align-items:center;justify-content:center;flex-direction:column;gap:10px;padding:26px}
+#lightbox.show{display:flex}
+#lightbox img{max-width:94vw;max-height:78vh;border-radius:10px;box-shadow:0 24px 70px #000;background:#0b0f14}
+#lbinfo{font-size:12.5px;color:#c9d6e4;text-align:center;max-width:min(900px,92vw);white-space:pre-wrap;overflow-wrap:anywhere}
+#lbbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
+#toast{position:fixed;left:50%;bottom:34px;transform:translate(-50%,14px);background:#0b0f14;border:1px solid var(--line);border-radius:10px;padding:10px 16px;font-size:13px;box-shadow:0 14px 40px #000b;opacity:0;pointer-events:none;transition:.2s;z-index:90;max-width:80vw}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- narrow ---------- */
+@media (max-width:1180px){
+  #genform{width:340px}
+  .metrics{gap:10px}
+}
+@media (max-width:1080px){
+  #genwrap{flex-direction:column}
+  #genform{width:auto;border-right:none;border-bottom:1px solid var(--line);max-height:46vh}
+  .field{grid-template-columns:180px 1fr}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <button id="btnSide" title="收起 / 展开会话列表" aria-label="收起或展开会话列表">☰</button>
+  <div class="logo">Local Model <span>Studio</span></div>
+  <div class="tabs">
+    <button id="tabChat" class="active">💬 对话<span class="badge hid" id="bChat"></span></button>
+    <button id="tabImage">🎨 生图<span class="badge hid" id="bImg"></span></button>
+  </div>
+  <div class="status" id="modePill"><i class="dot" id="modeDot"></i><span id="modeTxt">连接中…</span></div>
+  <div class="spacer"></div>
+  <div class="metrics">
+    <div>显存 <b id="mGpu">–</b></div>
+    <div>温度 <b id="mTemp">–</b></div>
+    <div>占用 <b id="mUtil">–</b></div>
+    <div><span class="bar"><i id="mBar"></i></span></div>
+  </div>
+  <div class="mtps">本轮 <b id="mTps">–</b> tok/s</div>
+  <button id="btnLog">日志</button>
+  <button id="btnSet" class="primary">⚙ 设置</button>
+</header>
+
+<main>
+<aside id="side">
+  <div class="sidehead"><button id="btnNew" class="primary" title="开始一个新会话">＋ 新会话</button></div>
+  <div id="sideList"></div>
+</aside>
+<!-- ============================== TAB 1: 对话 ============================== -->
+<div class="tabpane active" id="paneChat">
+  <div id="chatwrap">
+    <div id="msgs"><div class="inner" id="msgsInner"></div></div>
+    <div id="composer">
+      <button id="btnJump" class="hid" title="回到最新消息（你往上翻的时候不会自动跟随，点这里回到最底部并恢复跟随）" aria-label="回到底部"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v13"/><path d="M5 12l7 7 7-7"/></svg></button>
+      <div class="inner">
+        <div class="qbar">
+          <div class="grp">思考深度
+            <div class="seg" id="segEffort">
+              <button data-v="none">关闭</button>
+              <button data-v="medium">中等</button>
+              <button data-v="xhigh">高</button>
+            </div>
+          </div>
+          <div class="grp" id="permGrp" title="Agent 模式在 ⚙ 设置 →「Agent（工具执行）」里控制，默认是「执行」。这一排是沙箱档位：仅可查看＝哪都能读、一个字节也不许写，命令每次都要你点允许；工作区内修改＝读不受限，写只限下面的工作目录；完全权限＝读写到哪都行、命令不再询问">
+            <span class="grpico">🛡</span>
+            <div class="seg" id="segPerm">
+              <button data-v="readonly">仅可查看</button>
+              <button data-v="workspace">工作区内修改</button>
+              <button data-v="full">完全权限</button>
+            </div>
+          </div>
+          <button id="btnSearch" class="mini">🌐 联网：关</button>
+          <div class="spacer"></div>
+          <span id="quickNote"></span>
+        </div>
+        <div class="drop" id="drop">
+          <div id="imgNote"></div>
+          <div class="attach" id="attach"></div>
+          <div class="row">
+            <button id="btnAttach" title="添加图片或文档（也能直接 Ctrl+V 粘贴 / 拖拽进来）｜图片：贴图，发送前在浏览器里缩到设置的长边；文档：PDF / Word / Excel / PPT / RTF / HTML / CSV / 文本与代码，先解析出正文再随消息发出去" aria-label="添加图片或文档"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
+            <textarea id="input" rows="1" placeholder="问点什么…（Enter 发送，Shift+Enter 换行；📎 图片和 PDF / Word / Excel / PPT 等文档都在同一个按钮里，也能直接粘贴或拖进来；图片与扫描件交给本机视觉模型读，第一次会自动打开「识图」并重启引擎）"></textarea>
+            <button id="btnArt" title="把输入框里的文字当成绘图提示词，直接出图">🎨 出图</button>
+            <button id="btnStop" class="danger hid">⏹ 停止</button>
+            <button id="btnSend" class="primary">发送</button>
+          </div>
+        </div>
+        <div class="hint">
+          <span id="hintModel">–</span>
+          <span id="hintVision"></span>
+          <span id="hintLora"></span>
+          <span id="hintEngine"></span>
+          <span id="hintAgent"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== TAB 2: 生图 ============================== -->
+<div class="tabpane" id="paneImage">
+  <div id="genwrap">
+    <div id="genform">
+      <div class="fbody">
+        <div class="pcard">
+          <h3>提示词</h3>
+          <textarea id="iprompt" rows="5" placeholder="例：一只戴墨镜的柴犬趴在沙滩上，胶片质感"></textarea>
+          <div style="margin-top:11px">
+            <label class="mini" style="margin:0">系统级负面词 <span style="color:#5f6b7a">（一直生效 · 自动排在最前面 · 改完自动保存）</span></label>
+            <textarea id="isysneg" rows="3" placeholder="例：worst quality, low quality, blurry, watermark, extra fingers"></textarea>
+            <div class="subhint" id="isysneghint"></div>
+          </div>
+          <div style="margin-top:9px">
+            <div style="display:flex;gap:6px;align-items:center;margin-bottom:5px">
+              <label class="mini" style="margin:0;flex:1">负面提示词 <span style="color:#5f6b7a">（cfg=1 时基本不起作用）</span></label>
+              <button class="mini" id="btnSample">示例描述</button>
+            </div>
+            <textarea id="ineg" rows="2" placeholder="例：文字、水印、多余的手指"></textarea>
+          </div>
+        </div>
+
+        <div class="pcard">
+          <h3>参考图 <span class="r">放了图就是改图</span></h3>
+          <div class="drop" id="idrop">
+            <div style="font-size:12.5px;color:var(--dim);text-align:center;padding:14px 8px">拖一张图片到这里，或 <span style="color:var(--acc)">点击选择</span></div>
+          </div>
+          <input type="file" id="ifile" accept="image/*" multiple class="hid">
+          <div class="attach" id="ithumbs" style="margin-top:9px"></div>
+        </div>
+
+        <div class="pcard">
+          <h3>参数 <span class="r">上面这一排是快捷预设</span></h3>
+          <div class="presets" id="ipresets" style="margin-bottom:10px"></div>
+          <div class="pgrid">
+            <div><label class="mini" for="isteps">步数 <span class="v" id="isteps_v">25</span></label>
+              <input type="range" id="isteps" min="1" max="60" step="1" value="25"></div>
+            <div><label class="mini" for="isteps_n">步数（数值）</label>
+              <input type="number" id="isteps_n" min="1" max="200" step="1" value="25"></div>
+            <div><label class="mini" for="icfg">cfg <span class="v" id="icfg_v">1.0</span></label>
+              <input type="range" id="icfg" min="0" max="8" step="0.1" value="1"></div>
+            <div><label class="mini" for="icfg_n">cfg（数值）</label>
+              <input type="number" id="icfg_n" min="0" max="20" step="0.1" value="1"></div>
+            <div><label class="mini" for="iw">宽</label><input type="number" id="iw" min="256" max="4096" step="32" value="1024"></div>
+            <div><label class="mini" for="ih">高</label><input type="number" id="ih" min="256" max="4096" step="32" value="1024"></div>
+            <div><label class="mini" for="iseed">随机种子 <span style="color:#5f6b7a">(-1 随机)</span></label><input type="number" id="iseed" value="-1" step="1"></div>
+            <div><label class="mini" for="ibatch">一次画几张</label>
+              <select id="ibatch"><option value="1" selected>1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></div>
+            <div><label class="mini" for="isampler">采样器</label>
+              <select id="isampler"><option value="euler" selected>euler</option><option value="euler_ancestral">euler_ancestral</option><option value="dpmpp_2m">dpmpp_2m</option><option value="dpmpp_2m_sde">dpmpp_2m_sde</option><option value="uni_pc">uni_pc</option></select></div>
+            <div><label class="mini" for="isched">调度器</label>
+              <select id="isched"><option value="simple" selected>simple</option><option value="normal">normal</option><option value="beta">beta</option><option value="sgm_uniform">sgm_uniform</option><option value="karras">karras</option></select></div>
+          </div>
+          <div class="ratios" id="iratios"></div>
+          <div style="margin-top:10px;display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+            <label class="chk"><input type="checkbox" id="irandom" checked> 随机种子</label>
+            <label class="chk"><input type="checkbox" id="ilora"> LoRA 加速</label>
+            <label class="mini" style="margin:0;min-width:120px">强度 <span class="v" id="ilora_v">1.0</span></label>
+          </div>
+          <input type="range" id="ilorar" min="0" max="2" step="0.05" value="1" style="margin-top:6px">
+          <div style="font-size:11.5px;color:#5f6b7a;margin-top:6px">LoRA 是 8 步加速版：开启后步数必须改成 8，否则图会糊。</div>
+        </div>
+
+        <div class="pcard">
+          <h3>画幅与改图 <span class="r">放了参考图才生效</span></h3>
+          <label class="mini" for="icanvas">输出画幅</label>
+          <select id="icanvas">
+            <option value="follow" selected>跟随参考图（默认）</option>
+            <option value="origin">按原图比例·原尺寸</option>
+            <option value="scale">按原图比例·放大倍数</option>
+            <option value="area">按原图比例·指定像素</option>
+            <option value="ratio">指定比例 + 像素</option>
+            <option value="custom">自定义宽×高（可扩图）</option>
+          </select>
+          <div class="pgrid" style="margin-top:9px">
+            <div id="icanvasScale" class="hid">
+              <label class="mini" for="icanvas_scale">放大倍数</label>
+              <select id="icanvas_scale">
+                <option value="0.5">×0.5（更快）</option>
+                <option value="1" selected>×1（原尺寸）</option>
+                <option value="1.5">×1.5</option>
+                <option value="2">×2</option>
+                <option value="3">×3</option>
+                <option value="4">×4</option>
+              </select>
+            </div>
+            <div id="icanvasPx" class="hid">
+              <label class="mini" for="icanvas_px">输出面积</label>
+              <select id="icanvas_px">
+                <option value="1048576">1MP（1024²）</option>
+                <option value="2359296">2.25MP（1536²）</option>
+                <option value="4194304" selected>4MP（2048²）</option>
+                <option value="8294400">8.3MP（2880²）</option>
+                <option value="16777216">16.7MP（4096²）</option>
+              </select>
+            </div>
+            <div id="icanvasRatio" class="hid">
+              <label class="mini" for="icanvas_ratio">输出比例</label>
+              <select id="icanvas_ratio">
+                <option value="1:1" selected>1:1 方形</option>
+                <option value="4:3">4:3</option>
+                <option value="3:4">3:4 竖</option>
+                <option value="3:2">3:2</option>
+                <option value="2:3">2:3 竖</option>
+                <option value="16:9">16:9</option>
+                <option value="9:16">9:16 竖</option>
+                <option value="21:9">21:9 宽</option>
+                <option value="9:21">9:21 长竖</option>
+                <option value="4:5">4:5 竖</option>
+                <option value="5:4">5:4</option>
+              </select>
+            </div>
+            <div id="icanvasMp" class="hid">
+              <label class="mini" for="icanvas_mp">输出像素</label>
+              <select id="icanvas_mp">
+                <option value="0.5">0.5MP</option>
+                <option value="1" selected>1MP（1024²）</option>
+                <option value="2">2MP</option>
+                <option value="4">4MP（2048²）</option>
+                <option value="8">8MP</option>
+              </select>
+            </div>
+            <div>
+              <label class="mini" for="idenoise">降噪 denoise <span class="v" id="idenoise_v">1.00</span></label>
+              <input type="range" id="idenoise" min="0" max="1" step="0.05" value="1">
+            </div>
+            <div>
+              <label class="mini" for="idenoise_n">降噪（数值）<span style="color:#5f6b7a"> · 1.0 = 完全重画</span></label>
+              <input type="number" id="idenoise_n" min="0" max="1" step="0.05" value="1">
+            </div>
+            <div>
+              <label class="mini" for="iresolution">参考图像素 resolution</label>
+              <input type="number" id="iresolution" min="0" max="4096" step="32" value="1024">
+            </div>
+          </div>
+          <div class="subhint" id="icanvashint"></div>
+        </div>
+
+        <div class="pcard" id="icard">
+          <h3>绘图内核 <span class="r" id="iqueue">队列 —</span></h3>
+          <div style="font-size:12.5px;color:var(--dim)" id="istatus">读取中…</div>
+          <div style="font-size:11.5px;color:#5f6b7a;margin-top:7px">出图存在：<b id="ioutdir" style="font-weight:500;color:var(--dim);word-break:break-all">–</b></div>
+          <div style="margin-top:9px;display:flex;gap:6px;flex-wrap:wrap">
+            <button class="mini" id="btnBoot">启动绘图内核</button>
+            <button class="mini" id="btnFree">释放显存</button>
+            <button class="mini" id="btnQuit">停止绘图引擎</button>
+            <button class="mini" id="btnOutdir">打开输出目录</button>
+            <button class="mini" id="btnPickdir">换输出位置…</button>
+            <button class="mini" id="btnSelftest">环境自检</button>
+          </div>
+          <div class="selftest hid" id="iselftest"></div>
+        </div>
+
+        <details class="pcard" id="iadv">
+          <summary>模型与显存（8G 卡出问题时来调）</summary>
+          <div class="pgrid" style="margin-top:9px">
+            <div><label class="mini" for="iunet">主模型 diffusion model</label><select id="iunet"></select></div>
+            <div><label class="mini" for="idtype">主模型精度</label><select id="idtype"></select></div>
+            <div><label class="mini" for="iclip">文本编码器</label><select id="iclip"></select></div>
+            <div><label class="mini" for="iclipdev">编码器运行设备</label><select id="iclipdev"></select></div>
+            <div><label class="mini" for="ivae">VAE</label><select id="ivae"></select></div>
+            <div><label class="mini" for="icachedev">Cache 设备</label><select id="icachedev"></select></div>
+            <div><label class="mini" for="icachedtype">Cache 精度</label><select id="icachedtype"></select></div>
+          </div>
+          <div class="subhint" id="iadvhint">列表由绘图内核提供：先点「启动绘图内核」（约 30–60 秒），这里才会长出可选项。</div>
+        </details>
+      </div>
+      <div id="gdbuttons">
+        <button id="btnGen" class="primary">生成</button>
+        <button id="btnCancel" class="danger hid">取消</button>
+        <div id="genstatus">就绪</div>
+      </div>
+    </div>
+
+    <div id="genright">
+      <div id="nowbar">
+        <span id="nowtitle">还没有本次生成的图</span>
+        <span class="spacer" style="flex:1"></span>
+        <label class="chk"><input type="checkbox" id="iwithfiles"> 删除时连图片文件一起删</label>
+        <button class="mini" id="btnClear" style="margin-left:10px">清空历史</button>
+      </div>
+      <div id="history"><div class="empty" style="margin-top:8vh"><h1>还没有历史</h1><div>左边写好提示词，点「生成」。</div></div></div>
+    </div>
+  </div>
+</div>
+</main>
+
+<!-- ============================== 设置抽屉 ============================== -->
+<div class="mask" id="mask"></div>
+<div class="drawer" id="drawer">
+  <div class="dhead">⚙ 设置<span class="spacer"></span><span id="setStatus" style="font-size:12px;color:var(--dim);font-weight:400"></span><button class="mini" id="btnCloseSet">关闭</button></div>
+  <div class="tabs2" id="tabs"></div>
+  <div class="dbody" id="setBody"></div>
+  <div class="dfoot">
+    <button id="btnApply" class="primary">应用</button>
+    <button id="btnRevert">放弃修改</button>
+    <span class="spacer"></span>
+    <span id="dirty" style="font-size:12.5px;color:var(--dim)"></span>
+  </div>
+</div>
+
+<!-- ============================== 日志 ============================== -->
+<div class="mask" id="maskLog"></div>
+<div class="drawer" id="drawerLog">
+  <div class="dhead">引擎日志
+    <div class="seg" id="logWhich" style="margin-left:10px"><button data-w="chat" class="on">对话引擎</button><button data-w="bridge">绘图桥</button></div>
+    <span class="spacer"></span><button class="mini" id="btnCloseLog">关闭</button>
+  </div>
+  <div class="dbody"><pre class="log" id="logBox">加载中…</pre></div>
+</div>
+
+<div id="lightbox">
+  <img id="lbImg" alt="">
+  <div id="lbinfo"></div>
+  <div id="lbbar">
+    <button id="lbPrev">← 上一张</button>
+    <button id="lbNext">下一张 →</button>
+    <button id="lbClose">关闭</button>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* ============================================================================
+ * Local Model Studio — 单文件前端
+ *   对话 = llama-server (Ternary Bonsai 2 27B)，生图 = Qwen Studio 桥 + ComfyUI
+ *   全部同源相对路径；不引入任何外部资源。
+ * ==========================================================================*/
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
+const SAFE = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+const esc = (s) => String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, (c) => SAFE[c]);
+const fmt = (n, d = 0) => (n === null || n === undefined || n === '' || isNaN(n)) ? '–' : Number(n).toFixed(d);
+const g = (o, p, d) => { let c = o; for (const k of p.split('.')) { if (c === null || c === undefined) return d; c = c[k]; } return c === undefined ? d : c; };
+const num = (v, d) => { const n = parseFloat(v); return isNaN(n) ? d : n; };
+const int = (v, d) => { const n = parseInt(v, 10); return isNaN(n) ? d : n; };
+
+let STATE = null, DRAFT = null, ALL_ITEMS = [], CURTAB = 'chat', BUSY = false, ABORT = null;
+let LASTSTATE = { msg: '连接中…', cls: '' };
+
+/* ---------------------------------------------------------------- toast / lightbox */
+let toastT = null;
+function toast(msg, ms) {
+  const el = $('#toast'); el.textContent = msg; el.classList.add('on');
+  clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), ms || 2400);
+}
+let LB = { list: [], idx: 0 };
+function openLightbox(list, idx) {
+  LB = { list: list || [], idx: idx || 0 };
+  renderLB();
+  $('#lightbox').classList.add('show');
+}
+function renderLB() {
+  const it = LB.list[LB.idx];
+  if (!it) return;
+  $('#lbImg').src = it.url;
+  $('#lbinfo').textContent = (it.cap ? it.cap + '\n' : '') + (LB.list.length > 1 ? (LB.idx + 1) + ' / ' + LB.list.length : '');
+  $('#lbPrev').classList.toggle('hid', LB.list.length < 2);
+  $('#lbNext').classList.toggle('hid', LB.list.length < 2);
+}
+function closeLightbox() { $('#lightbox').classList.remove('show'); $('#lbImg').src = ''; }
+function lbStep(d) { if (!LB.list.length) return; LB.idx = (LB.idx + d + LB.list.length) % LB.list.length; renderLB(); }
+$('#lbClose').onclick = closeLightbox;
+$('#lbPrev').onclick = () => lbStep(-1);
+$('#lbNext').onclick = () => lbStep(1);
+$('#lightbox').onclick = (e) => { if (e.target.id === 'lightbox') closeLightbox(); };
+$('#lbImg').onclick = () => lbStep(1);
+
+/* 给 #msgsInner 上的图片做事件委托：单击看大图，加载失败显示占位而不是裸「图裂」 */
+$('#msgsInner').addEventListener('click', (e) => {
+  const im = e.target.closest('img');
+  if (!im || !im.src) return;
+  const box = im.closest('.imgs');
+  const all = box ? Array.from(box.querySelectorAll('img')) : [im];
+  const list = all.map((x) => ({ url: x.getAttribute('src'), cap: (x.parentElement && x.parentElement.querySelector('.imgcap') ? x.parentElement.querySelector('.imgcap').textContent : '') || '' }));
+  const i = Math.max(0, all.indexOf(im));
+  if (list[i]) { list[i].cap = im.dataset.cap || list[i].cap; }
+  openLightbox(list, i);
+});
+document.addEventListener('error', (e) => {
+  const t = e.target;
+  if (t && t.tagName === 'IMG' && t.dataset && !t.dataset.failed) {
+    t.dataset.failed = '1';
+    t.classList.add('broken');
+    t.alt = '图片打不开';
+    t.title = t.dataset.cap || t.dataset.url || '';
+  }
+}, true);
+
+/* ---------------------------------------------------------------- 会话消息模型 */
+let MSGS = [];   // {id,role,text,think,status,search,tool,tools,prog,images,stats,open,err}
+let MSGID = 0;
+const newMsg = (role, extra) => Object.assign({ id: ++MSGID, role, text: '', think: '', status: '', search: null, tool: null, tools: [], stepN: 0, stepMax: 0, prog: null, images: [], stats: null, open: false, err: false }, extra || {});
+const aiBusy = () => !!(MSGS.length && MSGS[MSGS.length - 1].role === 'assistant' && !MSGS[MSGS.length - 1].done);
+let renderQueued = false;
+function queueRender() {
+  /* 流式 token 每几毫秒就来一条，直接重画会把主线程打满（页面卡到滚不动），
+   * 所以节流到 ~90ms 一次。 */
+  if (renderQueued) return;
+  renderQueued = true;
+  setTimeout(() => { renderQueued = false; render(true); }, 90);
+}
+
+/* ---------------------------------------------------------------- 状态栏 */
+async function refresh() {
+  try {
+    const r = await fetch('/api/state');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    STATE = await r.json();
+  } catch (e) {
+    $('#modeTxt').textContent = '界面服务未响应';
+    $('#modeDot').className = 'dot';
+    return;
+  }
+  const gpu = STATE.gpu || {};
+  const used = num(gpu.used, null), total = num(gpu.total, null);
+  $('#mGpu').textContent = (used === null ? '–' : used) + ' / ' + (total === null ? '–' : total) + ' MB';
+  $('#mTemp').textContent = (gpu.temp === undefined || gpu.temp === null) ? '–' : (gpu.temp + '°C');
+  $('#mUtil').textContent = (gpu.util === undefined || gpu.util === null) ? '–' : (gpu.util + '%');
+  $('#mBar').style.width = (used !== null && total) ? Math.min(100, Math.round(used / total * 100)) + '%' : '0';
+
+  const st = STATE.chat || {}, im = STATE.image || {};
+  const cell = used !== null ? ('显存 ' + used + ' / ' + total + ' MB' + (gpu.name ? ' · ' + gpu.name : '')) : '显存读取失败';
+  if (STATE.switching) {
+    LASTSTATE = { msg: ((STATE.switching.note || '正在切换…') + ' '), cls: ' mbusy', spin: true };
+  } else if (STATE.mode === 'chat') {
+    LASTSTATE = { msg: '对话模型已加载' + (st.ready ? '' : '（启动中…）'), cls: ' mchat' };
+  } else if (STATE.mode === 'image') {
+    LASTSTATE = { msg: '绘图引擎已加载', cls: ' mimage' };
+  } else {
+    LASTSTATE = { msg: '空闲（未加载任何模型）', cls: '' };
+  }
+  $('#modeTxt').textContent = LASTSTATE.msg;
+  $('#modeDot').className = 'dot' + (STATE.switching ? ' busy' : (STATE.mode === 'chat' ? ' on' : (STATE.mode === 'image' ? ' busy' : '')));
+  $('#modePill').className = 'status' + LASTSTATE.cls;
+
+  const cset = st.settings || {};
+  const m = (st.catalog && st.catalog.models || []).find((x) => x.id === cset.model);
+  $('#hintModel').textContent = '上下文 ' + (cset.ctx ? Number(cset.ctx).toLocaleString() : '–') + ' · ' + (cset.vision ? '视觉已开' : '纯文本') + (m ? ' · ' + m.name : '');
+  $('#hintVision').textContent = cset.vision ? '' : '（发图前需在设置里打开视觉）';
+  $('#hintLora').textContent = (!cset.lora || cset.lora === 'none') ? '原版行为' : ('LoRA ' + cset.lora + ' · scale ' + cset.loraScale);
+  $('#hintEngine').textContent = st.alive ? ('引擎 ' + (st.ready ? '就绪' : '启动中') + ' · :' + st.port) : ('引擎未启动 · :' + st.port);
+
+  const q = $('#quickNote');
+  // 思考深度与联网都是「热生效、逐请求发送」，选项与已存设置不一致时也无需提示 —— 这里恒定留空。
+  q.textContent = '';
+
+  // 生图左侧的引擎状态 + 当前任务
+  const ist = im.status || {};
+  const job = ist.job || ist;
+  const busyImg = job && job.state === 'running';
+  $('#istatus').innerHTML = im.alive
+    ? '桥运行中 · 端口 ' + esc(im.port) + ' · ComfyUI ' + (im.comfyAlive ? '<b style="color:#7ee2a8">已就绪</b>' : '<span style="color:#e3b341">未就绪</span>')
+      + (busyImg ? '<br>正在画：' + esc(job.step || 0) + ' / ' + esc(job.total_steps || 0) + (job.node ? ' · ' + esc(job.node) : '') : '')
+    : '桥未启动（端口 ' + esc(im.port) + '）· 点「生成」会自动启动，约 30–60 秒';
+  if (busyImg) setImgBusy(true); else if (!IMG.busy) setImgBusy(false);
+
+  // 输出位置 / 队列 / （内核起来后）模型与显存的可选项
+  IMG.alive = !!im.alive;
+  IMG.outDir = im.outDir || '';
+  IMG.outDirIsDefault = !!im.outDirIsDefault;
+  paintOutDir();
+  const qEl = $('#iqueue');
+  if (qEl) {
+    const run = int(ist.queue_running, 0), pend = int(ist.queue_pending, 0);
+    qEl.textContent = !im.alive ? '队列 —' : (run ? ('正在运行 ' + run + ' 个任务') : (pend ? ('排队中 ' + pend) : '队列空闲'));
+  }
+  if (im.alive) loadImgBootstrap();
+
+  // 系统级负面词：桥在跑就用桥报的值，桥没跑时服务端会直接读 image/settings.json 兜底
+  if (im.sysNegative !== undefined) fillSysNegUI(im.sysNegative);   // 桥的 /api/status 不带 system，值以服务端读 settings.json 为准
+}
+
+/* ---------------------------------------------------------------- 聊天渲染 */
+function searchHtml(sp) {
+  const list = (sp.results || []).map((r, i) => `<div class="sitem">
+      <div class="t">${i + 1}. ${r.link ? '<a href="' + esc(r.link) + '" target="_blank" rel="noopener noreferrer">' + esc(r.title || r.link) + '</a>' : esc(r.title || '(无标题)')}</div>
+      ${r.link ? '<div class="u">' + esc(r.link) + '</div>' : ''}
+      ${r.snippet ? '<div class="s">' + esc(r.snippet) + '</div>' : ''}
+    </div>`).join('') || '<div class="sitem">没有解析到结果</div>';
+  return `<details class="src" ${sp.open ? 'open' : ''} data-openkey="search"><summary>🌐 联网来源：${esc(sp.query || '')}（${(sp.results || []).length} 条）</summary><div class="slist">${list}</div></details>`;
+}
+/* -------------------------------------------------- agent 工具卡片渲染 */
+const TOOL_ICON = { list_files: '📁', read_file: '📄', read_document: '📚', write_file: '✍️', write_document: '📝', edit_file: '✏️', grep: '🔎', run_command: '⌨️', web_search: '🌐', web_fetch: '🔗', generate_image: '🎨', request_permission: '🛡' };
+function toolState(t) {
+  if (t.status === 'ask') return ['ask', t.name === 'request_permission' ? '等你批准放行' : '等待你确认'];
+  if (t.status === 'run') return ['run', '运行中…' + (t.t0 ? ' ' + Math.max(0, Math.round((Date.now() - t.t0) / 1000)) + 's' : '')];
+  if (t.status === 'ok') return ['ok', t.ms ? ('完成 · ' + fmt(t.ms / 1000, 1) + 's') : '完成'];
+  if (t.status === 'denied') return ['denied', '已拒绝'];
+  return ['err', '失败'];
+}
+/* 正在跑的工具卡片上挂个秒表：命令可能跑几分钟，没有秒表看着就像卡死了。
+ * 只改那一个 <span class="st"> 的文本，不整块重绘（避免闪烁）。 */
+const __RUN_T = new Map();
+function __tickRunning() {
+  if (!__RUN_T.size) return;
+  const now = Date.now();
+  for (const [tid, t0] of __RUN_T) {
+    const sel = '[data-tid="' + (window.CSS && CSS.escape ? CSS.escape(tid) : String(tid).replace(/["\\]/g, '\\$&')) + '"] .st';
+    const el = document.querySelector('.tcard .th' + sel);
+    if (!el) { __RUN_T.delete(tid); continue; }
+    el.textContent = '运行中… ' + Math.max(0, Math.round((now - t0) / 1000)) + 's';
+  }
+}
+setInterval(__tickRunning, 1000);
+function toolArgLine(t) {
+  const p = t.preview || {}, a = t.args || {};
+  const one = (v) => String(v === undefined || v === null ? '' : v).replace(/\s+/g, ' ').slice(0, 170);
+  if (p.kind === 'perm') return one(p.reason || '');
+  if (p.kind === 'exec') return '$ ' + one(p.command);
+  if (p.path) return one(p.path);
+  if (p.text) return one(p.text);
+  const v = a.path || a.query || a.url || a.prompt || '';
+  return v ? one(v) : one(JSON.stringify(a));
+}
+function tcardBody(t) {
+  const p = t.preview || {}, a = t.args || {};
+  let h = '';
+  if (p.kind === 'perm') {
+    /* 申请一次性放行：把「要干什么、为什么」摆在卡片上，用户点允许＝这一次放行。 */
+    h += '<div class="prow"><span class="ptag">🛡 申请一次性放行</span><span>'
+      + esc((p.action === 'exec' ? '要执行命令' : '要写文件') + (p.target ? '：' + p.target : '')) + '</span></div>';
+    if (p.reason) h += '<div class="lbl">理由</div><pre>' + esc(p.reason) + '</pre>';
+    h += '<div class="lbl">点「允许」后：这一次按「完全权限」放行（只放行这一次，之后照旧按当前档位判定）</div>';
+  } else if (t.name === 'edit_file') {
+    h += '<div class="lbl">' + esc(p.path || a.path || '') + '</div>';
+    if (p.old) h += '<div class="lbl">原内容</div><pre class="old">' + esc(p.old) + '</pre>';
+    if (p.fresh) h += '<div class="lbl">改为</div><pre class="new">' + esc(p.fresh) + '</pre>';
+  } else if (t.name === 'write_file') {
+    h += '<div class="lbl">' + esc(p.path || a.path || '') + (p.bytes ? ' · ' + p.bytes + ' 字节' : '') + '</div>';
+    if (p.text) h += '<pre>' + esc(p.text) + (p.bytes > 1500 ? '\n…（预览到这里，完整内容以实际写入为准）' : '') + '</pre>';
+  } else if (t.name === 'run_command') {
+    h += '<div class="lbl">目录 ' + esc(p.cwd || a.cwd || '.') + '</div><pre>$ ' + esc(p.command || a.command || '') + '</pre>';
+  } else {
+    h += '<div class="lbl">参数</div><pre>' + esc(JSON.stringify(a, null, 2)) + '</pre>';
+  }
+  if (t.output) {
+    const o = String(t.output);
+    h += '<div class="lbl">结果</div><pre>' + esc(o.slice(0, 4000)) + (o.length > 4000 ? '\n…（已截断，共 ' + o.length + ' 字）' : '') + '</pre>';
+  }
+  if (t.files && t.files.length) {
+    h += '<div class="lbl">产出文件</div><div class="frow">'
+      + t.files.map((f) => `<button class="mini" data-open="${esc(f)}" title="${esc(f)}">📂 在文件夹里显示</button>`).join('')
+      + '</div><pre>' + esc(t.files.join('\n')) + '</pre>';
+  }
+  return h;
+}
+function tcardHtml(t) {
+  const st = toolState(t);
+  const ic = TOOL_ICON[t.name] || '🔧';
+  let h = '<div class="tcard ' + st[0] + '">';
+  h += '<div class="th" data-tid="' + esc(t.id) + '"><span class="ic">' + ic + '</span><span class="nm">' + esc(t.name)
+    + '</span><span class="ar">' + esc(toolArgLine(t)) + '</span><span class="st">' + esc(st[1]) + '</span></div>';
+  if (t.open) h += '<div class="bd">' + tcardBody(t) + '</div>';
+  if (t.status === 'ask') {
+    /* 申请一次性放行的卡片（request_permission）与「被拒后重试的那一次」都只给一次性的
+     * 「允许」——「本次会话都允许」对它们没有意义（DSH 里也不存在会话级授权）。 */
+    const oneTime = t.oneshot || t.name === 'request_permission';
+    h += '<div class="acts"><span class="warn">' + (oneTime ? '要不要放行这一次？' : '这一步要你点一下') + '</span>'
+      + '<button class="mini primary" data-approve="allow" data-tid="' + esc(t.id) + '">' + (oneTime ? '允许这一次' : '允许') + '</button>'
+      + (oneTime ? '' : '<button class="mini" data-approve="allow_always" data-tid="' + esc(t.id) + '">本次会话都允许</button>')
+      + '<button class="mini danger" data-approve="deny" data-tid="' + esc(t.id) + '">拒绝</button></div>';
+  }
+  return h + '</div>';
+}
+function toolsHtml(m) {
+  const arr = m.tools || [];
+  return arr.length ? arr.map(tcardHtml).join('') : '';
+}
+/* 用户在卡片上点「允许 / 本次会话都允许 / 拒绝」：先本地落状态（界面立刻变），
+ * 再把决定发给服务端那个还挂着的 promise。 */
+async function agentDecide(tid, decision) {
+  let t = null;
+  for (const m of MSGS) { const x = (m.tools || []).find((y) => y.id === tid); if (x) { t = x; break; } }
+  if (!t) return;
+  if (decision === 'allow_always') AGENT_ALLOW.add(t.name);
+  t.decision = decision;
+  t.status = decision === 'deny' ? 'denied' : 'run';
+  t.open = false;
+  repaintCards();
+  try {
+    const r = await fetch('/api/agent/approve', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: tid, decision: decision }) });
+    const j = await r.json().catch(() => ({}));
+    if (!j || !j.ok) {
+      t.status = 'denied';
+      t.output = (j && j.error) || '这条确认已经失效了（可能已超时或被取消）';
+      t.open = true;
+      repaintCards();
+    }
+  } catch (e) { toast('确认失败：' + e.message); }
+}
+function repaintCards() { render(!!BUSY); }
+/* 工具卡片只用一个委托监听：点卡片头折叠/展开，点按钮做权限决定，点产出文件在资源管理器里定位。 */
+$('#msgs').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-approve]');
+  if (btn) { e.preventDefault(); agentDecide(btn.dataset.tid, btn.dataset.approve); return; }
+  const op = e.target.closest('[data-open]');
+  if (op) {
+    e.preventDefault();
+    fetch('/api/agent/reveal', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ path: op.dataset.open }) })
+      .then((r) => r.json()).then((j) => { if (!j || !j.ok) toast('打不开：' + ((j && j.error) || '未知错误')); })
+      .catch((err) => toast('打不开：' + err.message));
+    return;
+  }
+  const th = e.target.closest('.tcard .th');
+  if (!th) return;
+  const tid = th.dataset.tid;
+  for (const m of MSGS) {
+    const x = (m.tools || []).find((y) => y.id === tid);
+    if (x) { x.open = !x.open; repaintCards(); return; }
+  }
+});
+function msgInner(m) {
+  let h = '';
+  if (m.search) h += searchHtml(m.search);
+  if (m.tools && m.tools.length) h += toolsHtml(m);
+  if (m.tool) {
+    const a = m.tool.args || {};
+    const d = a.prompt ? String(a.prompt) : JSON.stringify(a);
+    h += `<div class="step"><span class="spin"></span><span>正在生成图片：${esc(d).slice(0, 300)}${m.tool.done ? '（已提交）' : ''}</span></div>`;
+  }
+  if (m.prog) {
+    const p = m.prog, cur = num(p.step, 0), tot = num(p.total, 0);
+    const pct = tot ? Math.min(100, Math.round(cur / tot * 100)) : 0;
+    h += `<div class="step" style="margin-bottom:2px"><span>${esc(p.state || 'running')} · ${cur} / ${tot || '?'}${p.node ? ' · 节点 ' + esc(p.node) : ''}${p.elapsed ? ' · ' + fmt(p.elapsed, 1) + 's' : ''}</span></div>
+      <div class="pbar ${tot ? '' : 'pindet'}"><i style="width:${tot ? pct + '%' : ''}"></i></div>`;
+  }
+  if (m.status) h += `<div class="step"><span>${esc(m.status)}</span></div>`;
+  if (m.think) h += `<details class="think" ${m.open ? 'open' : ''} data-openkey="think"><summary>思考过程（${m.think.length} 字）</summary>${esc(m.think)}</details>`;
+  if (m.images && m.images.length) {
+    h += '<div class="imgs">' + m.images.map((im) => {
+      const capName = String(im.name || '').split(/[\\/]/).pop();
+      const cap = capName || im.file || (im.url && im.url.startsWith('data:') ? '' : (im.url || ''));
+      const tail = im.w ? (im.w + '×' + im.h + (im.size ? ' · ' + Math.round(im.size / 1024) + ' KB' : '')) : '';
+      return `<div><img class="gen" src="${esc(im.url)}" data-cap="${esc(cap)}" loading="lazy" alt="${esc(m.role === 'user' ? (capName || '附件图片') : '生成图')}">${(tail || cap) ? `<div class="imgcap">${esc(tail)}${cap ? '<br>' + esc(cap) : ''}</div>` : ''}</div>`;
+    }).join('') + '</div>';
+  }
+  /* 用户这轮带的文档：一条一条列出来，点开就是服务端存的那份原文件 */
+  if (m.docs && m.docs.length) {
+    h += '<div class="dlist">' + m.docs.map((d) => `<a class="dchip" href="${esc(d.url || ('/doc-file/' + encodeURIComponent(d.stored || '')))}" target="_blank" rel="noopener" title="${esc((d.path || d.name || '') + '（点击打开 / 下载原文件）')}">
+      <span class="dico">${docIcon(d)}</span><span class="dname">${esc(d.name || '文档')}</span><span class="dmeta">${esc(docMeta(d))}</span></a>`).join('') + '</div>';
+  }
+  const t = esc(m.text);
+  h += `<div class="text">${t}${m.streaming ? ' <span class="spin"></span>' : ''}</div>`;
+  const foot = footSpans(m);
+  if (foot) h += '<div class="tok">' + foot + '</div>';
+  return h;
+}
+/* footer（速度行 / 上限提示 / 统计 / 备注）单独抽出来：流式原地更新要用同一份渲染 */
+function footSpans(m) {
+  const foot = [];
+  if (m.speed) foot.push('<span style="color:#7ea6d8">' + fmt(m.speed, 1) + ' tok/s</span>');
+  if (m.stats && m.stats.finish === 'length') foot.push('<span style="color:#e6a23c">⚠ 已到单次输出上限，没写完 —— 发「继续」可接着写，或把设置里的「单次最多输出」调大</span>');
+  if (m.stats) foot.push(statsLine(m.stats));
+  if (m.meta) foot.push(esc(m.meta));
+  if (m.histNote) foot.push('<span style="color:#6f7d8c">' + esc(m.histNote) + '</span>');
+  return foot.join(' · ');
+}
+function statsLine(s) {
+  const p = [];
+  if (s.gen_tokens !== null && s.gen_tokens !== undefined) p.push(s.gen_tokens + ' tokens');
+  if (s.gen_tps) p.push(fmt(s.gen_tps, 1) + ' tok/s');
+  if (s.prompt_tokens !== null && s.prompt_tokens !== undefined) p.push('提示 ' + s.prompt_tokens + ' tokens' + (s.prompt_tps ? '（' + fmt(s.prompt_tps, 1) + ' tok/s）' : ''));
+  if (s.cached_n) p.push('缓存命中 ' + s.cached_n);
+  if (s.wall_s !== null && s.wall_s !== undefined) p.push('用时 ' + fmt(s.wall_s, 1) + 's');
+  if (s.images && s.images.length) p.push('出图 ' + s.images.length + ' 张');
+  return p.length ? p.join(' · ') : '';
+}
+function msgNode(m) {
+  const cls = m.role === 'user' ? 'user' : (m.role === 'system' ? 'sys' : (m.err ? 'err' : 'ai'));
+  const who = m.role === 'user' ? '你' : (m.role === 'system' ? '系统' : (m.err ? '错误' : 'Bonsai'));
+  const av = m.role === 'user' ? '你' : (m.role === 'system' ? '调' : (m.err ? '!' : 'AI'));
+  const d = document.createElement('div');
+  d.className = 'msg ' + cls;
+  d.dataset.id = m.id;
+  d.innerHTML = `<div class="avatar">${av}</div><div class="bubble"><div class="who">${who}</div><div class="inner2"></div></div>`;
+  d.querySelector('.inner2').innerHTML = msgInner(m);
+  return d;
+}
+function bindOpen(node) {
+  node.querySelectorAll('[data-openkey]').forEach((el) => {
+    el.addEventListener('toggle', () => {
+      const m = MSGS.find((x) => String(x.id) === node.dataset.id);
+      if (!m) return;
+      const k = el.dataset.openkey;
+      if (k === 'think') m.open = el.open; else if (m.search) m.search.open = el.open;
+    });
+  });
+}
+function patchStreaming(n, m) {
+  /* 纯对话的流式输出只做「原地更新」，绝不重建节点。
+   * 原因：render() 每 ~90ms 跑一次，整块 innerHTML 重建会把 <details> 换成新节点，
+   * 真实鼠标点击的按下与抬起就落在两个不同节点上，click 根本派发不到 <summary>
+   * ⇒ 表现就是「思考过程的小三角点不开」（CDP 实测：流式中点击 open 恒为 false，
+   * 静止后点击才是 true）。原地更新同时消掉了速度行闪烁。
+   * 有工具/进度/联网来源/图片块时结构会中途变化，交回整块重建。 */
+  if (m.tool || m.prog || m.search || (m.tools && m.tools.length) || (m.images && m.images.length) || (m.docs && m.docs.length)) return false;
+  const inner = n.querySelector('.inner2');
+  if (!inner) return false;
+  const dt = inner.querySelector('details.think');
+  const step = inner.querySelector('.step');
+  const tx = inner.querySelector('.text');
+  if (!tx) return false;
+  if (!!m.think !== !!dt) return false;        // 思考块出现 / 消失 ⇒ 结构变了
+  if (!!m.status !== !!step) return false;     // 状态行出现 / 消失
+  if (dt) {
+    const sm = dt.querySelector('summary');
+    if (sm) sm.textContent = '思考过程（' + m.think.length + ' 字）';
+    if (dt.childNodes[1]) dt.childNodes[1].nodeValue = m.think;
+    else dt.appendChild(document.createTextNode(m.think));
+  }
+  if (step) step.innerHTML = '<span>' + esc(m.status) + '</span>';
+  tx.innerHTML = esc(m.text) + (m.streaming ? ' <span class="spin"></span>' : '');
+  const foot = footSpans(m);
+  const tok = inner.querySelector('.tok');
+  if (tok) { if (foot) tok.innerHTML = foot; else tok.remove(); }
+  else if (foot) tx.insertAdjacentHTML('afterend', '<div class="tok">' + foot + '</div>');
+  return true;
+}
+/* ------------------------------------------------- 滚动跟随（#msgs / 思考块）
+ * 两个滚动容器，规则不一样：
+ *  · #msgs（整段对话）：只有 STICK=true（用户还贴着底部）时才自动跟到最新。
+ *    用户往上翻历史时一动不动 —— 以前每 ~90ms 一次的 render 都会无条件
+ *    `scrollTop = scrollHeight`，翻历史时会被一次次拽回底部，根本看不了旧消息。
+ *    离开底部就弹出右下角 ↓ 按钮，回到最底部（或点它）后自动恢复跟随。
+ *  · .think（思考过程，max-height:210px 自带滚动条）：流式生成时跟着最新一行走，
+ *    否则里面永远停在开头（用户看到的就是「思考一直在最上面」）；用户在它里面
+ *    往上翻过就不再打扰他，翻回底部又自动跟上。 */
+const STICK_GAP = 48;          // #msgs 距底部多少 px 以内算「还贴着底部」
+const THINK_GAP = 24;          // .think 的判定阈值更小一点，免得挡住他刚滚上去的位置
+let STICK = true;
+const nearBot = (el, gap) => el.scrollHeight - el.scrollTop - el.clientHeight <= (gap || STICK_GAP);
+const FOLLOW = new WeakMap();  // 内部滚动容器（.think）-> 还要不要继续跟着底部
+function paintJump() {
+  const el = $('#msgs'), b = $('#btnJump');
+  if (!el || !b) return;
+  b.classList.toggle('hid', STICK || el.scrollHeight - el.clientHeight <= 4);
+}
+function jumpToBottom() {
+  const el = $('#msgs');
+  if (!el) return;
+  STICK = true;
+  el.scrollTop = el.scrollHeight;
+  paintJump();
+}
+$('#msgs').addEventListener('scroll', () => { STICK = nearBot($('#msgs')); paintJump(); }, { passive: true });
+/* .think 的 scroll 不冒泡，所以挂在 #msgsInner 的捕获阶段上；程序自己滚到底也会触发一次，
+ * 结果同样是「贴着底部」，不会把自己关掉。 */
+$('#msgsInner').addEventListener('scroll', (e) => {
+  const t = e.target;
+  if (t && t.classList && t.classList.contains('think')) FOLLOW.set(t, nearBot(t, THINK_GAP));
+}, true);
+$('#btnJump').onclick = () => jumpToBottom();
+function render(streaming) {
+  const box = $('#msgsInner');
+  if (!MSGS.length) {
+    const vs = g(STATE, 'chat.settings.vision');
+    box.innerHTML = `<div class="empty">
+      <h1>Ternary Bonsai 2 27B · 本机 8 GB 显存</h1>
+      <div>权重只跑在本机显卡上，不联网。${vs ? '视觉塔已加载，可以直接贴图。' : '（当前是纯文本模式，发图请先在 ⚙ 设置里启用视觉。）'}</div>
+      <div class="chips">
+        <button data-p="用三句话解释什么是三值量化（ternary quantization），以及它为什么能省显存。">解释三值量化</button>
+        <button data-p="写一个 Python 函数，判断一个字符串是不是回文，并给出两个测试用例。">写代码</button>
+        <button data-p="画一只戴墨镜的柴犬趴在沙滩上，胶片质感。">🎨 画一张图</button>
+        <button data-p="Search the web for today's NVIDIA driver release notes and summarise. 记得联网。">联网搜一下</button>
+      </div></div>`;
+    box.querySelectorAll('[data-p]').forEach((b) => b.onclick = () => { $('#input').value = b.dataset.p; $('#input').focus(); });
+    return;
+  }
+  if (box.querySelector('.empty')) box.innerHTML = '';
+  /* 只重建「该重建的」：结构变化（增删消息、顺序不对）时全量重建，否则只更新
+   * 需要更新的那条。流式输出时每 ~90ms 才更新一次，避免整棵 DOM 每帧重画。 */
+  const nodes = Array.from(box.children);
+  const structural = nodes.length !== MSGS.length || nodes.some((n, i) => n.dataset.id !== String(MSGS[i].id));
+  if (structural) {
+    box.innerHTML = '';
+    MSGS.forEach((m) => { const n = msgNode(m); bindOpen(n); box.appendChild(n); });
+  } else {
+    const targets = streaming ? [MSGS[MSGS.length - 1]] : MSGS;
+    for (const m of targets) {
+      const n = box.querySelector('[data-id="' + m.id + '"]');
+      if (!n) continue;
+      /* 流式中（还没收尾）走原地更新：保住 <details> 的展开态与点击手感；结构真变了、
+       * 或已经收尾，才整块重建（收尾必须重建，否则 footer 永远停在「xx tok/s」）。 */
+      if (streaming && m.streaming && patchStreaming(n, m)) continue;
+      /* 整块重建会把 <details> 换成新节点 —— 体会丢掉思考块内部的滚动位置，
+       * 收尾那次重建就会让思考「跳回开头」，所以先记下来再还回去。
+       * 展开态不用管：msgInner 是按 m.open 渲染的，bindOpen 的 toggle 一直把两者同步着。 */
+      const oldT = n.querySelector('details.think');
+      const keepT = oldT ? { top: oldT.scrollTop, follow: FOLLOW.get(oldT) } : null;
+      n.querySelector('.inner2').innerHTML = msgInner(m);
+      if (keepT) {
+        const nt = n.querySelector('details.think');
+        if (nt) {
+          nt.scrollTop = keepT.top;
+          if (keepT.follow !== undefined) FOLLOW.set(nt, keepT.follow);
+        }
+      }
+      bindOpen(n);
+    }
+  }
+  const el = $('#msgs');
+  if (STICK) el.scrollTop = el.scrollHeight;      // 用户翻历史时不打扰他（见上面 STICK 注释）
+  paintJump();
+  if (streaming && STICK) {
+    /* 思考块自己会滚（max-height:210px），跟着最新一行走，否则里面永远停在开头。 */
+    const last = MSGS[MSGS.length - 1];
+    const ln = last && box.querySelector('[data-id="' + last.id + '"]');
+    const tk = ln && ln.querySelector('details.think');
+    if (tk && tk.open && tk.scrollHeight - tk.clientHeight > 0 && FOLLOW.get(tk) !== false) tk.scrollTop = tk.scrollHeight;
+  }
+}
+function ensureChatEmpty() {
+  if (MSGS.length) return false;
+  render(false);
+  return true;
+}
+
+/* ---------------------------------------------------------------- 贴图 */
+function shrink(file, maxEdge) {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const im = new Image();
+    im.onload = () => {
+      const scale = Math.min(1, maxEdge / Math.max(im.width, im.height));
+      const w = Math.max(1, Math.round(im.width * scale)), h = Math.max(1, Math.round(im.height * scale));
+      const cv = document.createElement('canvas');
+      cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(im, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      const data = cv.toDataURL('image/jpeg', 0.85);
+      resolve({ url: data, name: file.name, w: w, h: h, from: im.width + '×' + im.height, to: w + '×' + h, kb: Math.round(data.length * 0.75 / 1024), scaled: scale < 1 });
+    };
+    im.onerror = () => {
+      URL.revokeObjectURL(url);
+      const rd = new FileReader();
+      rd.onload = () => resolve({ url: rd.result, name: file.name, w: 0, h: 0, kb: Math.round(file.size / 1024) });
+      rd.readAsDataURL(file);
+    };
+    im.src = url;
+  });
+}
+/* 贴图 downscale：图片 token 成本随边长平方增长（原图 1920×1200 ≈ 4145 prompt token），
+ * 所以发送前先在浏览器里缩到 imageMaxEdge。 */
+async function addImages(files, bag, renderFn) {
+  for (const f of files) {
+    if (!f.type || !f.type.startsWith('image/')) continue;
+    bag.push({ url: '', name: f.name, pending: true });
+    renderFn();
+    const a = await shrink(f, (g(STATE, 'chat.settings.imageMaxEdge') || 1280));
+    bag[bag.length - 1] = a;
+    renderFn();
+  }
+}
+
+/* ================================ TAB 1 · 对话 ================================ */
+let ATTACH = [];
+let DOCS = [];
+/* 文档附件：原文件 POST 到 /api/upload，落到 app/doc-files/<会话>-doc-<n>-<名字>，
+ * 返回 {path, kind, chars, note, pages, sheets…}。正文不在这条路上发给模型 ——
+ * 发消息时服务端会把 doc part 换成贴好正文的文本块（超长只贴前 docMaxChars 字）。 */
+const DOC_ICON = { pdf: '📕', docx: '📘', xlsx: '📗', pptx: '📙', csv: '📊', json: '🧾', html: '🌐', text: '📄', rtf: '📄', ole: '📎', zip: '🗜', binary: '📦', image: '🖼' };
+const DOC_KIND = { pdf: 'PDF', docx: 'Word', xlsx: 'Excel', pptx: 'PPT', csv: '表格', json: 'JSON', html: 'HTML', rtf: 'RTF', ole: '旧版 Office', binary: '二进制', text: '文本' };
+function docIcon(d) { return DOC_ICON[d && d.kind] || '📄'; }
+function docMeta(d) {
+  d = d || {};
+  if (d.pending) return '上传并解析中…';
+  if (d.ok === false) return String(d.warn || '上传失败').slice(0, 70);
+  const p = [];
+  if (d.kind && d.kind !== 'text') p.push(DOC_KIND[d.kind] || d.kind);
+  if (d.pages) p.push(d.pages + ' 页');
+  if (d.slides) p.push(d.slides + ' 张幻灯片');
+  if (d.sheets && d.sheets.length) p.push(d.sheets.length + ' 个工作表');
+  if (d.chars) p.push(d.chars + ' 字');
+  /* 没有可用文字层（图片 / 扫描件 / 坏文字层 PDF）：发消息时服务端会用本机视觉模型读图 */
+  if (d.needVision) p.push(d.visionOn === false ? '需识图（设置里是关的）' : '需识图 · 发消息时自动读');
+  if (d.size) p.push(Math.max(1, Math.round(d.size / 1024)) + ' KB');
+  return p.join(' · ') + (d.warn ? ' ⚠' : '');
+}
+function renderAttach() {
+  const imgs = ATTACH.map((a, i) => a.pending
+    ? `<div class="thumb pend"><span class="spin"></span><button data-i="${i}">×</button></div>`
+    : `<div class="thumb"><img src="${esc(a.url)}">${a.scaled ? `<span class="scaled">已缩至 ${esc(a.to)}</span>` : ''}<button data-i="${i}">×</button></div>`).join('');
+  const docs = DOCS.map((d, i) => `<div class="dthumb${d.pending ? ' pend' : ''}${d.ok === false ? ' bad' : ''}" title="${esc(d.path || d.warn || d.name || '')}">
+      <span class="dico">${docIcon(d)}</span>
+      <span class="dcol"><span class="dname">${esc(d.name || '文档')}</span><span class="dmeta">${esc(docMeta(d))}</span></span>
+      ${d.pending ? '<span class="spin"></span>' : ''}
+      <button data-d="${i}" title="移除这份文档">×</button>
+    </div>`).join('');
+  $('#attach').innerHTML = imgs + docs;
+  $('#attach').querySelectorAll('button[data-i]').forEach((b) => b.onclick = () => { ATTACH.splice(+b.dataset.i, 1); renderAttach(); });
+  $('#attach').querySelectorAll('button[data-d]').forEach((b) => b.onclick = () => {
+    const d = DOCS[+b.dataset.d];
+    DOCS.splice(+b.dataset.d, 1);
+    /* 顺手把服务端那份临时文件删掉（没上传成功就没有 stored） */
+    if (d && d.stored) fetch('/api/upload?stored=' + encodeURIComponent(d.stored), { method: 'DELETE' }).catch(() => {});
+    renderAttach();
+  });
+  const n = ATTACH.filter((a) => !a.pending).length, m = DOCS.filter((d) => !d.pending).length;
+  $('#imgNote').textContent = (ATTACH.length || m)
+    ? [ATTACH.length ? ATTACH.map((a) => a.pending ? '处理中…' : `${a.from ? a.from + '→' + a.to + ' · ' : ''}${a.kb} KB`).join('　') : '',
+       m ? `已附 ${m} 份文档` : ''].filter(Boolean).join('　')
+    : '';
+}
+/* 文档上传：一份一份来（服务端解析要时间），每份先画一个 pending 条，回来再补类型/字数。 */
+async function addDocs(files) {
+  for (const f of Array.from(files || [])) {
+    if (!f) continue;
+    if (f.type && f.type.startsWith('image/')) { await addImages([f], ATTACH, renderAttach); continue; }
+    const d = { name: f.name, size: f.size, pending: true };
+    DOCS.push(d);
+    renderAttach();
+    try {
+      const sid = (SESS && SESS.id) || 'tmp';
+      const r = await fetch('/api/upload?name=' + encodeURIComponent(f.name) + '&sid=' + encodeURIComponent(sid),
+        { method: 'POST', headers: { 'content-type': 'application/octet-stream' }, body: f });
+      const j = await r.json().catch(() => null);
+      if (!j || !j.ok) throw new Error((j && j.error) || ('HTTP ' + r.status));
+      Object.assign(d, j, { pending: false });
+    } catch (e) {
+      d.pending = false; d.ok = false; d.warn = String((e && e.message) || e);
+    }
+    renderAttach();
+  }
+}
+/* 拖拽/选择进来的文件按类型分流：图片走贴图（浏览器里缩图），其它一律当文档上传。 */
+function addAnyFiles(files) {
+  const arr = Array.from(files || []);
+  const imgs = arr.filter((f) => f.type && f.type.startsWith('image/'));
+  const docs = arr.filter((f) => !(f.type && f.type.startsWith('image/')));
+  if (imgs.length) addImages(imgs, ATTACH, renderAttach);
+  if (docs.length) addDocs(docs);
+}
+
+/* agent 模式：off / build（执行）。**开关只在 ⚙ 设置 →「Agent（工具执行）」里**，
+ * 输入框上方不再放这一排；这里只保存服务端生效值，请求时原样带上（AGENT_MODE）。
+ * AGENT_ALLOW 是「本次会话都允许」记住的工具名，只活在内存里（刷新就忘），换权限档位会清空。 */
+let AGENT_MODE = 'off';
+/* 联网搜索开关（#btnSearch）：状态只认这个变量，按钮上的 .on / 文案由 paintSearch 统一画。 */
+let WEB_SEARCH = false;
+/* 第一次 /api/state 回来之前，快捷开关一律不落盘：那会儿按钮上摆的还是 HTML 里的默认档
+ * （中等 / 工作区内修改 / Agent 关），照它存一次就会把用户真正的设置整片覆盖掉。 */
+let QUICK_READY = false;
+/* 权限档位：readonly / workspace / full —— 照 DeepSeek Harness 的三档沙箱。
+ * 读文件三档都不限制；写文件与执行命令按档位判定（服务端为准，这里只负责传值）。 */
+let AGENT_PERM = 'workspace';
+const AGENT_ALLOW = new Set();
+const PERM_NOTE = {
+  readonly: '权限：仅可查看（哪都能读，但一个文件也不能写；命令每次都要你点允许）',
+  workspace: '权限：工作区内修改（读不受限；只许写工作目录里的文件）',
+  full: '权限：完全权限（读写到哪都行、命令不再询问，风险自负）',
+};
+const FULL_ACCESS_WARN = '确认启用完全权限？\n\n启用完全权限后，智能体将减少确认步骤，并且可以直接执行更多操作，'
+  + '包括敏感操作、文件修改或外部命令。仅建议在你信任当前任务时使用。\n\n点「确定」＝我已了解风险，并愿意继续';
+function quickPayload() {
+  const s = (STATE && STATE.chat && STATE.chat.settings) || {};
+  const eff = ($('#segEffort').querySelector('button.on') || {}).dataset;
+  const pm = ($('#segPerm').querySelector('button.on') || {}).dataset;
+  return {
+    /* 优先用服务端下发的那一份（点按钮时各 handler 会先把新值同步进 STATE），DOM 只当兜底 ——
+     * 页面刚打开、STATE 还没到的时候，DOM 上摆的是不准的默认值。 */
+    reasoningEffort: s.reasoningEffort || (eff && eff.v) || 'medium',
+    /* Agent 开关已经挪进设置面板，这里只把当前生效值原样回写 —— 免得改联网或权限档时
+     * 把模式一起改掉（body.agent 由服务端读取，写错一次就会静默退化成普通对话）。 */
+    agentMode: s.agentMode || AGENT_MODE,
+    agentPerm: s.agentPerm || (pm && pm.v) || 'workspace',
+    webSearch: !!WEB_SEARCH,
+  };
+}
+/* quiet＝不往右边写文案：联网开关就是这种，开没开直接长在按钮上，再说一句是多余的。
+ * 失败信息任何时候都写（quiet 也一样），别把错误也一起静音。 */
+async function saveQuick(txt, quiet) {
+  if (!QUICK_READY) return;   // 设置还没读回来，这时候写盘＝拿默认值覆盖用户的真实配置
+  const p = quickPayload();
+  if (!quiet) $('#quickNote').textContent = '保存中…';
+  try {
+    const r = await (await fetch('/api/settings', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ settings: p }) })).json();
+    if (r.restarted) {
+      $('#quickNote').textContent = '引擎重启中…';
+      setTimeout(refresh, 2500);
+    } else if (!r.ok) {
+      $('#quickNote').textContent = '保存失败：' + (r.error || '');
+    } else if (!quiet) {
+      $('#quickNote').textContent = txt || '已保存';
+    }
+    /* 本地 STATE 立刻对齐：紧接着的 paintQuick() 会照 STATE 重画所有按钮，不同步的话
+     * 刚点下的状态会被旧值刷回去（联网开关以前就是这么「点了还是关」的）。 */
+    if (STATE && STATE.chat && STATE.chat.settings) {
+      STATE.chat.settings.reasoningEffort = p.reasoningEffort;
+      STATE.chat.settings.agentMode = p.agentMode;
+      STATE.chat.settings.agentPerm = p.agentPerm;
+      STATE.chat.settings.webSearch = p.webSearch;
+    }
+    if (!quiet) setTimeout(() => { $('#quickNote').textContent = ''; }, 2600);
+  } catch (e) { $('#quickNote').textContent = '保存失败：' + e.message; }
+}
+/* 联网开关：状态 / 高亮 / 文案三样一起画 —— 别处不要再手改这个按钮。 */
+function paintSearch(on) {
+  WEB_SEARCH = !!on;
+  $('#btnSearch').classList.toggle('on', WEB_SEARCH);
+  $('#btnSearch').textContent = WEB_SEARCH ? '🌐 联网：开' : '🌐 联网：关';
+  $('#btnSearch').title = WEB_SEARCH
+    ? '联网搜索已开启：每次发消息前用 Bing RSS 检索，把标题/摘要/链接拼进系统提示。点一下关闭。'
+    : '联网搜索已关闭。点一下开启（Bing RSS，本机唯一能通的检索通道）。';
+}
+function paintQuick() {
+  const s = g(STATE, 'chat.settings', {});
+  QUICK_READY = !!(STATE && STATE.chat && STATE.chat.settings);   // 只有拿到真设置，才允许保存
+  const eff = s.reasoningEffort || 'medium';
+  $('#segEffort').querySelectorAll('button').forEach((b) => b.classList.toggle('on', b.dataset.v === eff));
+  /* Agent 模式只由 ⚙ 设置 →「Agent（工具执行）」决定，输入框上方不再有开关。 */
+  const ag = s.agentMode || 'off';
+  AGENT_MODE = (ag === 'build' || ag === 'plan') ? ag : 'off';
+  /* 权限档位：老配置里可能只有 plan（＝只读档），服务端会兼容，界面这边也认。 */
+  const perm = (s.agentPerm === 'readonly' || s.agentPerm === 'full') ? s.agentPerm
+    : (AGENT_MODE === 'plan' ? 'readonly' : 'workspace');
+  AGENT_PERM = perm;
+  $('#segPerm').querySelectorAll('button').forEach((b) => b.classList.toggle('on', b.dataset.v === perm));
+  const agOff = AGENT_MODE === 'off';
+  $('#permGrp').classList.toggle('dim', agOff);
+  $('#segPerm').title = agOff
+    ? 'Agent 模式现在是「关闭」，这一档不生效 —— 去 ⚙ 设置 →「Agent（工具执行）」→「Agent 模式」切到「执行」才用得上。'
+    : (PERM_NOTE[perm] + '\n\n被沙箱拒绝后，模型可以申请一次性放行，你在卡片上点「允许」它才做那一次。');
+  /* 关着的时候在下面那行小字里说一声，免得以为是模型坏了；开着就不占地方。 */
+  $('#hintAgent').textContent = agOff
+    ? 'Agent 已关闭（普通对话；要它调工具干活，去 ⚙ 设置 → Agent 里切「执行」）' : '';
+  paintSearch(!!s.webSearch);
+}
+$('#segPerm').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  const v = b.dataset.v;
+  if (v === AGENT_PERM) return;
+  /* 完全权限是唯一需要「确认风险」才让选的档位（照 DeepSeek Harness 的做法）：
+   * 点确定＝我已了解风险，并愿意继续。 */
+  if (v === 'full' && !window.confirm(FULL_ACCESS_WARN)) return;
+  $('#segPerm').querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b));
+  AGENT_PERM = v;
+  if (STATE && STATE.chat && STATE.chat.settings) STATE.chat.settings.agentPerm = v;
+  AGENT_ALLOW.clear();   // 换档位＝换授权范围，「本次会话都允许」一并忘掉
+  saveQuick(PERM_NOTE[v]);
+  paintQuick();
+});
+$('#segEffort').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  $('#segEffort').querySelectorAll('button').forEach((x) => x.classList.remove('on'));
+  b.classList.add('on');
+  if (STATE && STATE.chat && STATE.chat.settings) STATE.chat.settings.reasoningEffort = b.dataset.v;
+  saveQuick('思考深度已切换');
+});
+$('#btnSearch').onclick = () => {
+  const on = !WEB_SEARCH;
+  paintSearch(on);
+  /* 先改本地 STATE 再保存：saveQuick 里还会同步一次，这里同步是为了让按钮立刻定住。 */
+  if (STATE && STATE.chat && STATE.chat.settings) STATE.chat.settings.webSearch = on;
+  saveQuick('', true);   // 开没开就写在按钮上，不再往右边多写一行「已开启联网」
+};
+
+/* ---------- 流式对话 ---------- */
+/* 这次请求要带上的历史轮次。旧版只发当前这一轮，模型看不到上文，会回「我没有上下文」。
+ * 预算按「上下文 - 单次最多输出 - 512」的余量估算（中文约 1.4 字/token，偏保守），
+ * 超预算就从最旧的一轮开始丢，并在 footer 里写明截断了多少轮。 */
+function histFor(msg) {
+  const s = g(STATE, 'chat.settings', {}) || {};
+  const ctx = Number(s.ctx || 16384), maxTok = Number(s.maxTokens || 4096);
+  let budget = Math.round((ctx - maxTok - 512) * 1.4);
+  if (!(budget > 800)) budget = 800;
+  const cut = MSGS.indexOf(msg) - 1;                 // 当前这轮 user 之前的历史
+  const turns = MSGS.slice(0, cut < 0 ? 0 : cut).filter((m) => !m.streaming && !m.err && m.role !== 'system'
+    && (String(m.text || '').trim() || (m.docs || []).length));
+  const out = []; let used = 0;
+  for (let i = turns.length - 1; i >= 0; i--) {
+    const t = histText(turns[i]);
+    const docs = (turns[i].docs || []).filter((d) => d && d.path);
+    /* 历史里的文档会再次被服务端贴成正文，所以要按 docMaxChars 估进预算 —— 否则
+     * 连着几轮带文档，提示会悄悄涨到把 ctx 撑爆。 */
+    const cap = Math.min(Number(s.docMaxChars) || 12000, 200000);
+    const docCost = docs.reduce((n, d) => n + Math.min(cap, Number(d.chars) || cap) * 1.4 + 60, 0);
+    const cost = t.length + 8 + docCost;
+    if (used + cost > budget) break;
+    used += cost;
+    out.unshift({
+      role: turns[i].role === 'assistant' ? 'assistant' : 'user',
+      content: docs.length
+        ? [{ type: 'text', text: t }].concat(docs.map((d) => ({ type: 'doc', path: d.path, name: d.name })))
+        : t,
+    });
+  }
+  return { msgs: out, dropped: turns.length - out.length };
+}
+/* 历史里除了正文，再补一小段「这轮用过哪些工具、成没成」——否则下一轮模型完全不知道
+ * 上一轮动过哪些文件，会重复劳动或者对着已改过的内容瞎猜。只留名字+一行摘要，很省。 */
+function histText(m) {
+  const base = String(m.text || '');
+  const docs = (m.docs || []).filter((d) => d && d.path);
+  const arr = m.tools || [];
+  if (!arr.length && !docs.length) return base;
+  const seg = [];
+  if (arr.length) seg.push('[这轮用过的工具]\n' + arr.slice(-12).map((t) => {
+    const st = t.status === 'ok' ? '成功' : t.status === 'denied' ? '被拒绝' : t.status === 'err' ? '失败' : '未完成';
+    return '- ' + t.name + '(' + toolArgLine(t).slice(0, 120) + ') → ' + st;
+  }).join('\n'));
+  if (docs.length) seg.push('[这轮带了文档] ' + docs.map((d) => d.name + '（' + (d.kind || '文档') + (d.chars ? ' · ' + d.chars + ' 字' : '') + '）').join('、'));
+  return base + '\n\n' + seg.join('\n');
+}
+async function chatStream(msg, useSearch) {
+  const parts = [];
+  if (msg._text) parts.push({ type: 'text', text: msg._text });
+  /* 文档只传「路径 + 名字」，正文由服务端（inlineDocParts）读了贴进对话 —— 这样
+   * 界面不用把 PDF 正文塞进浏览器，超长也由 docMaxChars 在服务端统一裁。 */
+  for (const d of msg._docs || []) if (d && d.path) parts.push({ type: 'doc', path: d.path, name: d.name || '' });
+  for (const a of msg._imgs || []) if (!a.pending && a.url) parts.push({ type: 'image_url', image_url: { url: a.url } });
+  const hist = histFor(msg);
+  if (hist.dropped) msg.histNote = '上下文超预算，只带了最近 ' + hist.msgs.length + ' 轮（更早的 ' + hist.dropped + ' 轮没带）';
+  const payload = { messages: hist.msgs.concat([{ role: 'user', content: parts }]), search: !!useSearch, tools: true, agent: AGENT_MODE, perm: AGENT_PERM, autoAllow: Array.from(AGENT_ALLOW) };
+  const r = await fetch('/api/chat', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload), signal: ABORT.signal });
+  if (!r.ok) throw new Error((await r.text()).slice(0, 400) || ('HTTP ' + r.status));
+  const rd = r.body.getReader(), dec = new TextDecoder();
+  let buf = '';
+  for (;;) {
+    const { done, value } = await rd.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    const lines = buf.split('\n');
+    buf = lines.pop();
+    for (const line of lines) {
+      if (!line.startsWith('data:')) continue;
+      const data = line.slice(5).trim();
+      if (!data || data === '[DONE]') continue;
+      let j; try { j = JSON.parse(data); } catch (_) { continue; }
+      switch (j.type) {
+        case 'mode': msg.status = '引擎就绪 · 模式 ' + (j.mode || '') + ' · :' + (j.port || ''); break;
+        case 'status': msg.status = j.text || ''; break;
+        case 'search': msg.search = { query: j.query, results: j.results || [], open: false }; msg.status = ''; break;
+        case 'reasoning': if (msg.status) msg.status = ''; msg.think += (j.text || ''); break;
+        case 'delta': if (msg.status) msg.status = ''; msg.text += (j.text || ''); break;
+        case 'tool': msg.tool = { name: j.name, args: j.args || {} }; msg.status = ''; break;
+        case 'step': msg.stepN = j.n; msg.stepMax = j.max; break;
+        case 'tool_call': {
+          if (!msg.tools) msg.tools = [];
+          msg.tools.push({
+            id: j.id, name: j.name, args: j.args || {}, preview: j.preview || null,
+            perm: j.perm || 'allow', mode: j.mode || AGENT_MODE, sandbox: j.sandbox || null,
+            oneshot: !!j.oneshot,
+            status: j.perm === 'ask' ? 'ask' : 'run', open: j.perm === 'ask',
+          });
+          msg.status = '';
+          break;
+        }
+        case 'tool_wait': {
+          const t = (msg.tools || []).find((x) => x.id === j.id);
+          if (t) { t.status = 'ask'; t.open = true; }
+          __RUN_T.delete(j.id);
+          break;
+        }
+        case 'tool_start': {
+          const t = (msg.tools || []).find((x) => x.id === j.id);
+          if (t && t.status !== 'ask') { t.status = 'run'; }
+          else if (t) { t.status = 'run'; t.open = false; }
+          if (t) { t.t0 = Date.now(); __RUN_T.set(j.id, t.t0); }
+          break;
+        }
+        case 'tool_result': {
+          const t = (msg.tools || []).find((x) => x.id === j.id);
+          if (t) {
+            t.status = j.denied ? 'denied' : (j.ok ? 'ok' : 'err');
+            t.output = j.output || '';
+            t.ms = j.ms || 0;
+            t.files = j.files || null;
+            if (!j.ok) t.open = true;   // 失败/被拒的把详情摊开，不用手动点
+          }
+          __RUN_T.delete(j.id);
+          break;
+        }
+        case 'progress': msg.prog = { state: j.state, step: j.step, total: j.total, node: j.node, elapsed: j.elapsed }; break;
+        case 'image': {
+          msg.images = (msg.images || []).concat(j.images || []);
+          msg.promptImg = j.prompt || '';
+          /* 出图结果到达后，进度条与工具提示折叠成一段历史说明（不渲染成进行中），
+           * 所以这里只收起状态行，保留 tool/prog 供 msgInner 渲染成静态文字。 */
+          msg.progDone = msg.prog;
+          msg.status = '';
+          if (CURTAB !== 'image') { $('#bChat').classList.remove('hid'); }
+          if (CURTAB === 'image') { $('#bImg').classList.remove('hid'); }
+          break;
+        }
+        case 'speed': msg.speed = j.tps; $('#mTps').textContent = fmt(j.tps, 1); break;
+        case 'stats': msg.stats = j; msg.speed = null; break;
+        case 'error': msg.err = true; msg.text += (msg.text ? '\n\n' : '') + '[错误] ' + (j.error || ''); break;
+        case 'done': msg.done = true; break;
+      }
+      queueRender();
+    }
+  }
+}
+async function send(forceText) {
+  if (BUSY) return;
+  const text = (forceText !== undefined ? forceText : $('#input').value).trim();
+  const docs = DOCS.filter((d) => !d.pending && d.path).map((d) => ({
+    name: d.name, path: d.path, chars: d.chars, kind: d.kind, ext: d.ext, note: d.note, warn: d.warn,
+    pages: d.pages, sheets: d.sheets, slides: d.slides, url: d.url, stored: d.stored, size: d.size,
+  }));
+  if (!text && !ATTACH.length && !docs.length) return;
+  const imgs = ATTACH.slice();
+  ATTACH = []; DOCS = []; renderAttach();
+  $('#input').value = ''; $('#input').style.height = 'auto';
+  const useSearch = WEB_SEARCH;
+  const um = newMsg('user', {
+    text: text,
+    images: imgs.filter((a) => a.url).map((a) => ({ url: a.url, name: a.name, w: a.w, h: a.h })),
+    docs: docs,
+  });
+  const ai = newMsg('assistant', { streaming: true, _text: text, _imgs: imgs, _docs: docs });
+  MSGS.push(um, ai);
+  STICK = true;              // 自己发消息：重新贴回底部
+  render(false);
+  BUSY = true;
+  $('#btnSend').disabled = true; $('#btnStop').classList.remove('hid');
+  ABORT = new AbortController();
+  const t0 = performance.now();
+  try {
+    await chatStream(ai, useSearch);
+    ai.meta = '总用时 ' + ((performance.now() - t0) / 1000).toFixed(1) + 's';
+  } catch (e) {
+    if (e && e.name === 'AbortError') { ai.status = '已停止生成'; }
+    else { ai.err = true; ai.text += (ai.text ? '\n\n' : '') + '[错误] ' + (e.message || e); }
+  }
+  ai.streaming = false; ai.done = true;
+  BUSY = false; $('#btnSend').disabled = false; $('#btnStop').classList.add('hid');
+  ABORT = null;
+  render(false);
+  sessSaveSoon();
+  refresh();
+}
+$('#btnSend').onclick = () => send();
+$('#btnStop').onclick = () => { if (ABORT) ABORT.abort(); };
+$('#input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(); }
+});
+$('#input').addEventListener('input', (e) => { e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 220) + 'px'; });
+/* 图片和文档合成一个按钮：accept 同时收图片与文档，选完按类型分流（addAnyFiles，
+ * 与拖拽那条路完全同一套逻辑）。以前是两个按钮、两份 accept 列表，容易点错。 */
+const ATTACH_ACCEPT = 'image/*,.pdf,.docx,.doc,.xlsx,.xls,.pptx,.ppt,.rtf,.txt,.md,.csv,.tsv,.json,.html,.htm,.xml,.yaml,.yml,.log,.js,.ts,.py,.sql,.srt';
+$('#btnAttach').onclick = () => {
+  const i = document.createElement('input');
+  i.type = 'file'; i.multiple = true; i.accept = ATTACH_ACCEPT;
+  i.onchange = () => addAnyFiles(i.files);
+  i.click();
+};
+document.addEventListener('paste', (e) => {
+  const files = Array.from((e.clipboardData && e.clipboardData.items) || []).filter((i) => i.type.startsWith('image/')).map((i) => i.getAsFile()).filter(Boolean);
+  if (files.length && CURTAB === 'chat') { addImages(files, ATTACH, renderAttach); e.preventDefault(); }
+});
+{
+  const drop = $('#drop');
+  ['dragenter', 'dragover'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('over'); }));
+  /* 拖进来的文件按类型分流：图片照旧贴图，其它一律当文档上传 */
+  drop.addEventListener('drop', (e) => addAnyFiles(e.dataTransfer.files));
+}
+
+/* ============================ 会话管理（落盘 app/sessions.json） ============================
+ * 以前历史只活在内存里：刷新一次全丢，也翻不回去。现在左栏列会话，服务端负责持久化，
+ * 贴图由服务端解码成 app/session-files/ 里的文件（见 server.js 的 persistMessages）。 */
+let SESS = { list: [], id: null };
+let SAVE_T = null;
+const DEL_SVG = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>';
+
+function fmtWhen(ts) {
+  if (!ts) return '';
+  const d = new Date(ts), now = new Date(), df = Date.now() - ts;
+  const hm = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  if (df < 60000) return '刚刚';
+  if (df < 3600000) return Math.floor(df / 60000) + ' 分钟前';
+  if (d.toDateString() === now.toDateString()) return hm;
+  const md = (d.getMonth() + 1) + '/' + d.getDate();
+  return (d.getFullYear() === now.getFullYear() ? md : d.getFullYear() + '/' + md) + ' ' + hm;
+}
+function sessPaint() {
+  const box = $('#sideList');
+  if (!SESS.list.length) { box.innerHTML = '<div class="cnone">还没有会话</div>'; return; }
+  box.innerHTML = SESS.list.map((s) => `<div class="conv${s.id === SESS.id ? ' active' : ''}" data-id="${esc(s.id)}">
+      <div class="cc"><div class="ct">${esc(s.title || '新会话')}</div><div class="cm">${esc(fmtWhen(s.updated))} · ${s.count || 0} 条</div></div>
+      <button class="cdel" data-del="${esc(s.id)}" title="删除这个会话" aria-label="删除这个会话">${DEL_SVG}</button>
+    </div>`).join('');
+}
+/* 只把这几个字段交给服务端，_text/_imgs/streaming 这类只对当前这一轮有意义 */
+function sessSnapshot() {
+  return MSGS.map((m) => ({
+    id: m.id, role: m.role, text: m.text, think: m.think, err: !!m.err,
+    stats: m.stats || null, search: m.search || null,
+    tool: m.tool && m.tool.name ? { name: m.tool.name, args: m.tool.args || {} } : null,
+    tools: (m.tools || []).map((t) => ({
+      id: t.id, name: t.name, args: t.args || {}, preview: t.preview || null, perm: t.perm || 'allow',
+      mode: t.mode || 'off', status: t.status === 'ask' || t.status === 'run' ? 'err' : t.status,
+      output: t.output || '', ms: t.ms || 0, files: t.files || null, open: !!t.open,
+    })),
+    stepN: m.stepN || 0, stepMax: m.stepMax || 0,
+    docs: (m.docs || []).map((d) => ({
+      name: d.name, path: d.path, chars: d.chars, kind: d.kind, ext: d.ext, note: d.note, warn: d.warn,
+      pages: d.pages, sheets: d.sheets, slides: d.slides, url: d.url, stored: d.stored, size: d.size,
+    })),
+    images: (m.images || []).map((im) => ({ url: im.url, file: im.file, w: im.w, h: im.h, size: im.size, name: im.name })),
+  }));
+}
+async function sessSave() {
+  if (!SESS.id) return;
+  const id = SESS.id;
+  try {
+    const r = await (await fetch('/api/sessions/' + encodeURIComponent(id), {
+      method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ messages: sessSnapshot() }),
+    })).json();
+    if (r && r.ok) {
+      const s = SESS.list.find((x) => x.id === id);
+      if (s) { s.title = r.title; s.count = r.count; s.updated = r.updated; sessPaint(); }
+    }
+  } catch (_) {}
+}
+function sessSaveSoon() { clearTimeout(SAVE_T); SAVE_T = setTimeout(sessSave, 400); }
+async function sessFlush() { clearTimeout(SAVE_T); await sessSave(); }
+async function sessActive(id) {
+  try { await fetch('/api/sessions/active', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: id }) }); } catch (_) {}
+}
+async function sessOpen(id, opts) {
+  if (BUSY) { toast('正在生成，等这一轮结束再切换会话'); return; }
+  if (id === SESS.id && !(opts && opts.force)) return;
+  await sessFlush();
+  let s = null;
+  try { s = await (await fetch('/api/sessions/' + encodeURIComponent(id))).json(); } catch (_) {}
+  if (!s || s.error || !Array.isArray(s.messages)) {
+    toast('这个会话读不到了');
+    SESS.list = SESS.list.filter((x) => x.id !== id); sessPaint(); return;
+  }
+  SESS.id = id;
+  MSGS = s.messages.map((m) => newMsg(m.role, Object.assign({}, m, { done: true, streaming: false })));
+  MSGID = MSGS.reduce((n, m) => Math.max(n, Number(m.id) || 0), 0);
+  ATTACH = []; renderAttach();
+  STICK = true;              // 切会话：直接看到最新的几条
+  render(false);
+  sessPaint();
+  sessActive(id);
+}
+async function sessNew(opts) {
+  if (BUSY) { toast('正在生成，等这一轮结束再新建'); return; }
+  await sessFlush();
+  try {
+    const r = await (await fetch('/api/sessions', { method: 'POST' })).json();
+    if (!r || !r.ok) throw new Error('创建失败');
+    SESS.list.unshift({ id: r.session.id, title: r.session.title, updated: r.session.updated, count: 0 });
+    SESS.id = r.session.id;
+    MSGS = []; MSGID = 0; ATTACH = []; renderAttach();
+    STICK = true;
+    render(false); sessPaint();
+    if (!(opts && opts.silent)) { $('#input').focus(); toast('新会话'); }
+  } catch (e) { toast('新建会话失败：' + (e.message || e)); }
+}
+async function sessDelete(id) {
+  const s = SESS.list.find((x) => x.id === id);
+  if (BUSY) { toast('正在生成，等这一轮结束再删'); return; }
+  if (!confirm('删除会话「' + ((s && s.title) || '新会话') + '」？删掉就找不回来了。')) return;
+  clearTimeout(SAVE_T);
+  try {
+    const r = await (await fetch('/api/sessions/' + encodeURIComponent(id), { method: 'DELETE' })).json();
+    if (r && r.sessions) SESS.list = r.sessions;
+    else SESS.list = SESS.list.filter((x) => x.id !== id);
+    if (SESS.id !== id) { sessPaint(); return; }
+    SESS.id = null;                                  // 删的是当前会话：落到列表第一个，空了就新建
+    if (SESS.list.length) await sessOpen(SESS.list[0].id, { force: true });
+    else await sessNew({ silent: true });
+    sessPaint();
+  } catch (e) { toast('删除失败：' + (e.message || e)); }
+}
+async function sessBoot() {
+  try {
+    const r = await (await fetch('/api/sessions')).json();
+    SESS.list = (r && r.sessions) || [];
+    const first = (r && r.activeId && SESS.list.some((x) => x.id === r.activeId)) ? r.activeId : (SESS.list[0] ? SESS.list[0].id : null);
+    if (first) await sessOpen(first, { force: true });
+    else await sessNew({ silent: true });            // 第一次运行：先落一个空会话，「当前会话」永远存在
+  } catch (_) {}
+  sessPaint();
+}
+$('#btnNew').onclick = () => sessNew();
+$('#btnSide').onclick = () => { document.body.classList.toggle('noside'); };
+$('#sideList').addEventListener('click', (e) => {
+  const del = e.target.closest('[data-del]');
+  if (del) { e.stopPropagation(); sessDelete(del.dataset.del); return; }
+  const it = e.target.closest('.conv');
+  if (it) sessOpen(it.dataset.id);
+});
+
+/* ---------- 🎨 出图（显式跨模态） ---------- */
+let ART = false;
+async function artisan() {
+  if (ART || BUSY) return;
+  const text = $('#input').value.trim();
+  if (!text) { toast('先在输入框里写一句画面描述'); $('#input').focus(); return; }
+  ART = true;
+  const btn = $('#btnArt'); btn.disabled = true;
+  const sm = newMsg('system', { text: '🎨 出图：' + text });
+  const am = newMsg('assistant', { streaming: true, tool: { name: 'generate_image', args: { prompt: text }, done: true } });
+  MSGS.push(sm, am);
+  render(false);
+  const t0 = performance.now();
+  const params = { prompt: text, negative: '', width: 1024, height: 1024, steps: 25, seed: -1, batch_size: 1, prefix: 'qwen_out', use_lora: false, lora_strength: 1.0 };
+  const timer = setInterval(async () => {
+    am.prog = { state: 'running', step: am.prog ? am.prog.step : 0, total: am.prog ? am.prog.total : 25, node: am.prog ? am.prog.node : '', elapsed: (performance.now() - t0) / 1000 };
+    render(true);
+    try {
+      const s = await (await fetch('/api/image/status')).json();
+      const job = s.job || s;
+      if (job && job.state === 'running') am.prog = { state: 'running', step: job.step, total: job.total_steps, node: job.node, elapsed: job.elapsed };
+      else if (!s.alive) am.prog = { state: 'waiting', step: 0, total: 0, node: '绘图内核启动中', elapsed: (performance.now() - t0) / 1000 };
+    } catch (_) {}
+  }, 1500);
+  try {
+    const r = await (await fetch('/api/generate-image', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ params: params, files: [], keepImage: false }) })).json();
+    clearInterval(timer);
+    am.prog = null; am.tool = null;
+    if (!r.ok) throw new Error(r.error || '生成失败');
+    const imgs = ((r.job && r.job.images) || []).map((x) => ({ url: x.url, file: x.file, w: x.w, h: x.h, size: x.size }));
+    am.images = imgs;
+    am.text = imgs.length ? '画好了。' : '（这次没有产出图片）';
+    am.stats = { wall_s: (performance.now() - t0) / 1000, gen_tokens: null, prompt_tokens: null, gen_tps: null, images: imgs };
+    render(false);
+    loadHistoryImg();
+  } catch (e) {
+    clearInterval(timer);
+    am.prog = null; am.err = true; am.text = '[出图失败] ' + (e.message || e);
+  }
+  am.streaming = false; am.done = true;
+  ART = false; btn.disabled = false;
+  render(false);
+  sessSaveSoon();
+  refresh();
+}
+
+/* ================================ TAB 2 · 生图 ================================ */
+const IMG = { files: [], busy: false, timer: null, t0: 0, history: [], lastGen: 0, mode: '', alive: false, outDir: '', outDirIsDefault: false,
+  /* HEAL：「后端其实空闲、界面却还在忙」时的自愈计数（见 imgPoll）。
+     以前 busy 只在 fetch 报错、或轮询到 done/error 时才解除；提交那一次 fetch
+     若因后端重启/连接断掉而永远不返回，按钮就永久禁用，只能刷新页面才救得回来。 */
+  heal: { idle: 0, lost: false, stall: 0, lastElapsed: -1 } };
+function renderThumbs() {
+  $('#ithumbs').innerHTML = IMG.files.map((f, i) => f.pending
+    ? `<div class="thumb pend"><span class="spin"></span><button data-i="${i}">×</button></div>`
+    : `<div class="thumb"><img src="${esc(f.url)}"><button data-i="${i}">×</button></div>`).join('');
+  $('#ithumbs').querySelectorAll('button').forEach((b) => b.onclick = () => { IMG.files.splice(+b.dataset.i, 1); renderThumbs(); });
+  syncCanvasUI();
+}
+$('#idrop').onclick = () => $('#ifile').click();
+$('#ifile').onchange = () => { addImages($('#ifile').files, IMG.files, renderThumbs); $('#ifile').value = ''; };
+{
+  const d = $('#idrop');
+  ['dragenter', 'dragover'].forEach((ev) => d.addEventListener(ev, (e) => { e.preventDefault(); d.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach((ev) => d.addEventListener(ev, (e) => { e.preventDefault(); d.classList.remove('over'); }));
+  d.addEventListener('drop', (e) => { addImages(e.dataTransfer.files, IMG.files, renderThumbs); });
+}
+/* 滑块 <-> 数字框双向同步 */
+function pair(a, b, dec) {
+  const A = $(a), B = $(b);
+  A.addEventListener('input', () => { B.value = dec ? Number(A.value).toFixed(dec) : A.value; paintPairLabels(); });
+  B.addEventListener('change', () => { let v = num(B.value, num(A.value, 1)); v = Math.max(num(B.min, 0), Math.min(num(B.max, 999), v)); B.value = v; A.value = v; paintPairLabels(); });
+}
+function paintPairLabels() {
+  $('#isteps_v').textContent = $('#isteps_n').value;
+  $('#icfg_v').textContent = Number($('#icfg_n').value).toFixed(1);
+  $('#ilora_v').textContent = Number($('#ilorar').value).toFixed(2);
+  if ($('#idenoise_v')) $('#idenoise_v').textContent = Number($('#idenoise_n').value).toFixed(2);
+}
+pair('#isteps', '#isteps_n', 0);
+pair('#icfg', '#icfg_n', 1);
+pair('#idenoise', '#idenoise_n', 2);
+$('#isteps_n').addEventListener('input', () => { $('#isteps').value = $('#isteps_n').value; paintPairLabels(); });
+$('#icfg_n').addEventListener('input', () => { $('#icfg').value = $('#icfg_n').value; paintPairLabels(); });
+$('#idenoise_n').addEventListener('input', () => { $('#idenoise').value = $('#idenoise_n').value; paintPairLabels(); });
+$('#ilorar').addEventListener('input', paintPairLabels);
+$('#irandom').addEventListener('change', () => { $('#iseed').disabled = $('#irandom').checked; });
+$('#iseed').disabled = true;
+$('#ilora').addEventListener('change', () => {
+  if ($('#ilora').checked && int($('#isteps_n').value, 25) !== 8) {
+    $('#isteps').value = 8; $('#isteps_n').value = 8; paintPairLabels();
+    toast('LoRA 是 8 步加速版，步数已改成 8');
+  }
+});
+const RATIOS = [['1:1 方形', 1, 1], ['3:2 横', 3, 2], ['2:3 竖', 2, 3], ['16:9 宽屏', 16, 9], ['9:16 竖屏', 9, 16], ['4:3', 4, 3], ['3:4', 3, 4]];
+$('#iratios').innerHTML = RATIOS.map((r) => `<button data-r="${r[1]}/${r[2]}">${r[0]}</button>`).join('');
+$('#iratios').querySelectorAll('button').forEach((b) => b.onclick = () => {
+  const p = b.dataset.r.split('/'), w = +p[0], h = +p[1];
+  const W = 1024;
+  const H = Math.max(256, Math.round(W * h / w / 32) * 32);
+  $('#iw').value = W; $('#ih').value = H;
+});
+$('#btnSample').onclick = () => {
+  $('#iprompt').value = 'a cozy Japanese kissaten cafe corner at golden hour, warm wood interior, a cup of latte on the counter, soft window light, kodak portra film look, no text';
+  $('#ineg').value = '文字, 水印, 签名, 多余的手指';
+};
+
+/* ---- 快捷预设：与旧版生图页同一套档位（快 / 质量优先 / 最精细 / 2K 大图 / 2K 精细 / 细节增强） ---- */
+const IMG_PRESETS = [
+  { id: 'fast', name: '快', desc: '8 步 LoRA · 约 22 秒' },
+  { id: 'quality', name: '质量优先', desc: '25 步 · 约 43 秒' },
+  { id: 'max', name: '最精细', desc: '40 步 · 约 70 秒' },
+  { id: '2k', name: '2K 大图', desc: '2048² · 25 步 · 约 4.6 分' },
+  { id: '2k40', name: '2K 精细', desc: '2048² · 40 步 · 约 7 分' },
+  { id: 'detail', name: '细节增强', desc: 'cfg 4 让负面词生效 · 25 步' },
+];
+function setPairVals(rangeSel, numSel, v) {
+  const A = $(rangeSel), B = $(numSel);
+  if (A) A.value = v;
+  if (B) B.value = v;
+}
+function applyImgPreset(id) {
+  const P = IMG_PRESETS.find((x) => x.id === id);
+  if (!P) return;
+  const size = (w, h) => { const a = $('#iw'), b = $('#ih'); if (a) a.value = w; if (b) b.value = h; };
+  const lora = (on) => { const el = $('#ilora'); if (el) el.checked = on; };
+  if (id === 'fast') {
+    lora(true); setPairVals('#isteps', '#isteps_n', 8); setPairVals('#icfg', '#icfg_n', 1);
+    size(1024, 1024); const s = $('#ilorar'); if (s) s.value = 1;
+  } else if (id === 'quality') {
+    lora(false); setPairVals('#isteps', '#isteps_n', 25); setPairVals('#icfg', '#icfg_n', 1); size(1024, 1024);
+  } else if (id === 'max') {
+    lora(false); setPairVals('#isteps', '#isteps_n', 40); setPairVals('#icfg', '#icfg_n', 1); size(1024, 1024);
+  } else if (id === '2k') {
+    lora(false); setPairVals('#isteps', '#isteps_n', 25); setPairVals('#icfg', '#icfg_n', 1); size(2048, 2048);
+  } else if (id === '2k40') {
+    lora(false); setPairVals('#isteps', '#isteps_n', 40); setPairVals('#icfg', '#icfg_n', 1); size(2048, 2048);
+  } else if (id === 'detail') {
+    /* 「细节增强」真正换来细节的是把 cfg 抬到 4，让负面提示词开始工作。
+       故意不碰「宽 × 高」：这一档不是把画布撑大（想让画面更大去点 2K 那两档）。
+       也绝不替用户往负面词框里填字 —— 用户明确要求默认留空，写什么由他自己定。 */
+    lora(false);
+    setPairVals('#isteps', '#isteps_n', 25);
+    setPairVals('#icfg', '#icfg_n', 4);
+    if ($('#isampler')) $('#isampler').value = 'euler';
+    if ($('#isched')) $('#isched').value = 'simple';
+  }
+  paintPairLabels();
+  $('#ipresets').querySelectorAll('button').forEach((b) => b.classList.toggle('on', b.dataset.p === id));
+  toast(id === 'detail'
+    ? '已切到「细节增强」：cfg 4，负面词开始生效 · 负面词框留空，写什么由你定'
+    : ('已切到「' + P.name + '」'));
+}
+$('#ipresets').innerHTML = IMG_PRESETS.map((p) => `<button data-p="${p.id}"><b>${p.name}</b><span>${p.desc}</span></button>`).join('');
+$('#ipresets').querySelectorAll('button').forEach((b) => b.onclick = () => applyImgPreset(b.dataset.p));
+
+/* ---- 系统级负面词：存服务端（image/settings.json），每次出图都由桥拼在用户负面词前面 ---- */
+let sysNegTimer = 0, sysNegSaved = null, sysNegLoaded = false;
+function sysNegCombinedUI() {
+  const out = [];
+  [($('#isysneg') || {}).value, ($('#ineg') || {}).value].forEach((s) => {
+    s = (s || '').trim().replace(/^[,\s]+|[,\s]+$/g, '');
+    if (s) out.push(s);
+  });
+  return out.join(', ');
+}
+function updateSysNegHintUI() {
+  const el = $('#isysneghint');
+  if (!el) return;
+  const v = (($('#isysneg') || {}).value || '');
+  el.textContent = v.trim()
+    ? ('本次实际发送：' + sysNegCombinedUI())
+    : '留空 = 不加系统级负面词（下面的「负面提示词」照常生效）';
+}
+function fillSysNegUI(v) {
+  const el = $('#isysneg');
+  if (!el) return;
+  v = String(v === undefined || v === null ? '' : v);
+  if (document.activeElement === el) return;                   // 用户正在里面打字，别动它
+  if (sysNegLoaded && el.value !== sysNegSaved) return;        // 本地有还没存上的改动
+  if (sysNegLoaded && el.value === v) return;
+  el.value = v; sysNegSaved = v; sysNegLoaded = true;
+  updateSysNegHintUI();
+}
+async function saveSysNegUI() {
+  const el = $('#isysneg');
+  if (!el) return;
+  const v = el.value || '';
+  if (sysNegLoaded && v === sysNegSaved) return;               // 没改过就别白发请求
+  try {
+    const r = await (await fetch('/api/image/sys-negative', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ sys_negative: v }),
+    })).json();
+    if (!r || !r.ok) throw new Error((r && r.error) || '未知错误');
+    sysNegSaved = v; sysNegLoaded = true;
+    toast(v.trim() ? ('系统级负面词已保存（' + v.trim().length + ' 字，一直生效）') : '系统级负面词已清空');
+  } catch (e) {
+    toast('系统级负面词没存上：' + (e.message || e));
+  }
+}
+{
+  const el = $('#isysneg');
+  if (el) {
+    el.addEventListener('input', () => {
+      updateSysNegHintUI();
+      clearTimeout(sysNegTimer);
+      sysNegTimer = setTimeout(saveSysNegUI, 700);             // 打字停下 700ms 才落盘
+    });
+    el.addEventListener('blur', () => { clearTimeout(sysNegTimer); saveSysNegUI(); });
+    updateSysNegHintUI();
+  }
+  const un = $('#ineg');
+  if (un) un.addEventListener('input', updateSysNegHintUI);
+}
+
+/* ---- 输出画幅 / 降噪 / 参考图面积预算：与旧版生图页同一套取值 ----
+   没放参考图时全是文生图：出图大小只看「宽 / 高」，这一栏选什么都不影响。 */
+const IMG_CANVAS_MODES = {
+  follow: [], origin: [], scale: ['#icanvasScale'], area: ['#icanvasPx'],
+  ratio: ['#icanvasRatio', '#icanvasMp'], custom: [],
+};
+function imgCanvasMode() { const el = $('#icanvas'); return el ? el.value : 'follow'; }
+function syncCanvasUI() {
+  const mode = IMG_CANVAS_MODES[imgCanvasMode()] ? imgCanvasMode() : 'follow';
+  Object.keys(IMG_CANVAS_MODES).forEach((k) => {
+    IMG_CANVAS_MODES[k].forEach((sel) => { const el = $(sel); if (el) el.classList.toggle('hid', k !== mode); });
+  });
+  const hasRef = IMG.files.some((f) => !f.pending);
+  const canWH = !hasRef || mode === 'custom';
+  [['#iw'], ['#ih']].forEach(([sel]) => {
+    const el = $(sel);
+    if (el) el.disabled = !canWH;
+  });
+  const hint = $('#icanvashint');
+  if (!hint) return;
+  if (!hasRef) hint.textContent = '没放参考图时是文生图：出图大小直接看上面的「宽 / 高」，「输出画幅」选什么都无所谓。想放大画面就点「2K 大图」预设。';
+  else if (mode === 'follow') hint.textContent = '当前：出图比例和像素完全由第一张参考图决定（竖屏参考图 → 竖屏出图）。想改比例或扩图，把「输出画幅」换成「自定义宽×高」。';
+  else if (mode === 'custom') hint.textContent = '当前：出图尺寸严格等于上面的「宽 × 高」，比参考图大就是向外扩图 —— 画布和参考图差得越远，原来的内容漂移越多，先用低步数试一张。';
+  else hint.textContent = '当前：出图比例跟随参考图，像素按这一栏换算（都是 32 的倍数）。';
+}
+if ($('#icanvas')) {
+  $('#icanvas').addEventListener('change', syncCanvasUI);
+  ['#icanvas_scale', '#icanvas_px', '#icanvas_ratio', '#icanvas_mp'].forEach((sel) => {
+    const el = $(sel);
+    if (el) el.addEventListener('change', syncCanvasUI);
+  });
+}
+
+/* ---- 模型与显存：选项表由绘图内核的 /api/bootstrap 提供（object_info），
+   内核没起来时这张表是空的 —— 那就保持折叠提示，不发请求、更不为了填选项去拉内核。 */
+let imgBootCfg = null, imgBootTrying = false, imgBootFailed = false;
+function fillImgSelect(sel, list, dflt) {
+  const el = $(sel);
+  if (!el) return;
+  const arr = (Array.isArray(list) ? list : []).filter((x) => typeof x === 'string' && x);
+  let uniq = arr.filter((v, i) => arr.indexOf(v) === i);
+  if (!uniq.length) uniq = ['default'];
+  const keep = el.value;
+  el.innerHTML = uniq.map((v) => `<option value="${esc(v)}">${esc(v)}</option>`).join('');
+  const want = uniq.indexOf(dflt) >= 0 ? dflt : (uniq.indexOf(keep) >= 0 ? keep : uniq[0]);
+  el.value = want;
+}
+async function loadImgBootstrap() {
+  if (imgBootCfg || imgBootTrying || imgBootFailed) return imgBootCfg;
+  imgBootTrying = true;
+  try {
+    const c = await (await fetch('/api/image/bootstrap')).json();
+    if (!c || !c.ok) throw new Error('bootstrap 没有返回配置');
+    imgBootCfg = c;
+    const avail = c.available || {}, opt = c.options || {}, dfl = c.defaults || {};
+    fillImgSelect('#iunet', avail.diffusion_models, dfl.unet_name);
+    fillImgSelect('#iclip', avail.text_encoders, dfl.clip_name);
+    fillImgSelect('#ivae', avail.vaes, dfl.vae_name);
+    fillImgSelect('#idtype', opt.weight_dtype, 'default');
+    fillImgSelect('#iclipdev', opt.clip_device, 'default');
+    fillImgSelect('#icachedev', opt.cache_device, 'auto');
+    fillImgSelect('#icachedtype', opt.cache_dtype, 'default');
+    const hint = $('#iadvhint');
+    if (hint) hint.textContent = '默认值就是平时该用的那套；改图报 aimdo memory compile error 时把「Cache 设备」改成 cpu。';
+  } catch (e) {
+    imgBootFailed = true;
+    const hint = $('#iadvhint');
+    if (hint) hint.textContent = '没能读取内核的模型列表：' + ((e && e.message) || e) + '（点「生成」把内核拉起来后会重试）';
+  } finally { imgBootTrying = false; }
+  return imgBootCfg;
+}
+if ($('#iadv')) {
+  $('#iadv').addEventListener('toggle', () => { if ($('#iadv').open && IMG.alive) loadImgBootstrap(); });
+}
+
+/* ---- 输出位置：改的是桥的 image/settings.json，桥没跑时后端会直接落盘（不拉内核） */
+function paintOutDir() {
+  const el = $('#ioutdir');
+  if (!el) return;
+  el.textContent = IMG.outDir ? (IMG.outDir + (IMG.outDirIsDefault ? '（默认）' : '')) : '–';
+}
+if ($('#btnPickdir')) {
+  $('#btnPickdir').onclick = async () => {
+    toast('请在打开的窗口里选一个文件夹…', 6000);
+    try {
+      const r = await (await fetch('/api/image/pick-output-dir', {
+        method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}',
+      })).json();
+      if (!r || !r.ok) { toast('改不了输出位置：' + ((r && r.error) || '未知错误'), 4200); return; }
+      if (r.cancelled) { toast('没有改，还是 ' + r.dir); return; }
+      IMG.outDir = r.dir; IMG.outDirIsDefault = false; paintOutDir();
+      toast('以后出的图都存到 ' + r.dir, 3600);
+    } catch (e) { toast('改不了输出位置：' + (e.message || e), 4200); }
+  };
+}
+
+/* ---- 环境自检：五关全在内存里做，不占显卡；但要有内核才能问它 */
+if ($('#btnSelftest')) {
+  $('#btnSelftest').onclick = async () => {
+    const box = $('#iselftest');
+    if (!IMG.alive) { toast('绘图内核没在运行：先点「启动绘图内核」（约 30–60 秒）再自检'); return; }
+    box.classList.remove('hid', 'ok', 'bad');
+    box.textContent = '正在检查…';
+    try {
+      const r = await (await fetch('/api/image/selftest')).json();
+      box.className = 'selftest ' + (r.ok ? 'ok' : 'bad');
+      box.innerHTML = '<b>' + (r.ok ? '✓ 一切正常' : '✗ 发现问题') + '</b>\n'
+        + (r.checks || []).map((c) => (c.ok ? '✓ ' : '✗ ') + esc(c.name) + '：' + esc(c.detail)).join('\n');
+      if (!r.ok) toast('自检发现问题，看「绘图内核」卡片里的说明');
+    } catch (e) {
+      box.className = 'selftest bad';
+      box.textContent = '自检失败：' + (e.message || e);
+    }
+  };
+}
+
+function imgParams() {
+  const random = $('#irandom').checked;
+  const seed = int($('#iseed').value, -1);
+  const p = {
+    prompt: $('#iprompt').value.trim(),
+    negative: $('#ineg').value.trim(),
+    steps: int($('#isteps_n').value, 25),
+    cfg: num($('#icfg_n').value, 1.0),
+    width: int($('#iw').value, 1024),
+    height: int($('#ih').value, 1024),
+    batch_size: int($('#ibatch').value, 1),
+    resolution: int($('#iresolution').value, 1024),
+    denoise: num($('#idenoise_n').value, 1.0),
+    canvas_mode: imgCanvasMode(),
+    canvas_scale: num($('#icanvas_scale').value, 1.0),
+    canvas_px: int($('#icanvas_px').value, 4194304),
+    canvas_ratio: $('#icanvas_ratio').value,
+    canvas_mp: num($('#icanvas_mp').value, 1.0),
+    sampler_name: $('#isampler').value,
+    scheduler: $('#isched').value,
+    seed: (random || seed < 0) ? -1 : seed,
+    prefix: 'qwen_out',
+    use_lora: $('#ilora').checked,
+    lora_strength: num($('#ilorar').value, 1.0),
+  };
+  for (const k of ['width', 'height']) p[k] = Math.max(256, Math.min(4096, Math.round(p[k] / 32) * 32));
+  // resolution 是「模型看参考图的面积预算」，0 是合法值（= 用参考图原始尺寸），
+  // 所以它不能跟着上面的 256 下限走，单独夹。
+  p.resolution = Math.max(0, Math.min(4096, Math.round(p.resolution / 32) * 32));
+  p.denoise = Math.max(0, Math.min(1, p.denoise));
+  // 模型与显存那几项要等内核把选项表给出来才有值：空着就干脆不传，
+  // 交给桥自己的兜底（DIFFUSION / ENCODER / VAE / default）。
+  const ADV = { unet_name: '#iunet', weight_dtype: '#idtype', clip_name: '#iclip', clip_device: '#iclipdev', vae_name: '#ivae', cache_device: '#icachedev', cache_dtype: '#icachedtype' };
+  for (const k in ADV) {
+    const el = $(ADV[k]);
+    const v = el ? String(el.value || '').trim() : '';
+    if (v) p[k] = v;
+  }
+  return p;
+}
+function setImgBusy(b) {
+  IMG.busy = b;
+  $('#btnGen').disabled = b;
+  $('#btnCancel').classList.toggle('hid', !b);
+}
+function setGenStatus(txt) { $('#genstatus').textContent = txt; }
+
+function renderNow() {
+  const job = IMG.job || {};
+  const imgs = job.images || [];
+  $('#nowtitle').textContent = imgs.length
+    ? ('本次生成 · ' + imgs.length + ' 张 · seed ' + (job.seed === undefined || job.seed === null ? '–' : job.seed) + ' · ' + fmt(job.elapsed, 1) + 's')
+    : (IMG.busy ? ('正在画 · ' + (job.step || 0) + ' / ' + (job.total_steps || 0) + (job.node ? ' · ' + job.node : '')) : '还没有本次生成的图');
+  if (!imgs.length) { $('#nowbox').innerHTML = ''; return; }
+  const list = imgs.map((x) => ({ url: x.url, cap: (x.w ? x.w + '×' + x.h + ' · ' + Math.round((x.size || 0) / 1024) + ' KB\n' : '') + (x.file || '') }));
+  $('#nowbox').innerHTML = '<div class="hgrid">' + list.map((x, i) => `<img class="nowimg" src="${esc(x.url)}" data-i="${i}" data-cap="${esc(x.cap)}" alt="生成结果">`).join('') + '</div>';
+  $('#nowbox').querySelectorAll('img').forEach((im) => im.onclick = () => openLightbox(list, +im.dataset.i));
+}
+
+async function imgGenerate() {
+  if (IMG.busy) return;
+  const p = imgParams();
+  if (!p.prompt) { toast('先写提示词'); $('#iprompt').focus(); return; }
+  if (p.use_lora && p.steps !== 8) toast('LoRA 是 8 步加速版：步数不是 8，图可能糊');
+  const files = IMG.files.filter((f) => !f.pending && f.url).map((f) => ({ name: f.name || 'ref.png', data: f.url }));
+  setImgBusy(true);
+  IMG.job = { state: 'running', step: 0, total_steps: p.steps, images: [] };
+  renderNow();
+  setGenStatus('提交中…');
+  IMG.heal = { idle: 0, lost: false, stall: 0, lastElapsed: -1 };
+  IMG.t0 = performance.now();
+  if (IMG.timer) clearInterval(IMG.timer);
+  /* 轮询要在提交之前就开跑：提交那一次 fetch 本身可能一直不返回（后端重启、
+     连接被判死），以前这种情况下界面完全收不到任何状态，就永久停在「正在画 · 0 / N」。 */
+  IMG.timer = setInterval(imgPoll, 1500);
+  imgPoll();
+  /* 提交超时给 16 分钟：后端这次请求是「同步等画完」的（runImageJob 会一直轮到
+     done 才回执），而它自己的作业超时是 15 分钟；这里必须比它长，否则会把一张
+     还在正常画的大图误判成「掉线了」。真正掉线由 imgPoll 的自愈分支兜住。 */
+  let r;
+  try {
+    r = await (await fetch('/api/image/generate', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      signal: AbortSignal.timeout(960000),
+      body: JSON.stringify({ params: p, files: files }),
+    })).json();
+  } catch (e) {
+    /* 超时/断连只说明「等不到提交回执」，不代表内核没在画。不再直接解忙：
+       若这次真的没跑起来，imgPoll 的自愈分支会在 3 秒左右把按钮交回来
+       （那时才提示「重按生成」）；若其实在画，它就照常显示进度。 */
+    if (IMG.heal) IMG.heal.lost = true;
+    setGenStatus('等不到提交回执（后端可能刚重启过），已改用内核状态判断…');
+    return;
+  }
+  if (!r.ok) {
+    if (IMG.timer) { clearInterval(IMG.timer); IMG.timer = null; }
+    setImgBusy(false); setGenStatus(''); renderNow(); toast(r.error || '提交失败');
+    return;
+  }
+  /* 正常回执里就是这一批的成品（后端阻塞到画完才回）。轮询多半已经渲染过同一份，
+     这里再补一次，保证「回执到了但轮询正好漏掉」也一定能显示出来。 */
+  if (r.job) { IMG.job = r.job; renderNow(); }
+}
+async function imgPoll() {
+  let s;
+  try { s = await (await fetch('/api/image/status')).json(); } catch (_) { return; }
+  const job = s.job || s;
+  if (!s.alive) { setGenStatus('绘图内核启动中…（首次约 30–60 秒）'); return; }
+  /* —— 自愈：后端说「空闲 / 没有任务」，界面却还在忙 —— */
+  if (!job || !job.state) {
+    if (IMG.busy) {
+      const H = IMG.heal;
+      if (++H.idle >= 2) {
+        /* 只在「确实等不到回执」时才认掉线：请求还挂着的时候，后端可能正在
+           切模式/拉内核（ensureImage 要停对话、等显存、起桥），这时状态本来就是
+           空闲，过早解锁会让用户重按 => bridge 回 busy => 白报一次错。
+           60 秒还没见着任务、回执也没来，才认定这次根本没提交上去。 */
+        if (H.lost || (performance.now() - IMG.t0) > 60000) {
+          H.idle = 0;
+          if (IMG.timer) { clearInterval(IMG.timer); IMG.timer = null; }
+          setImgBusy(false);
+          setGenStatus('这次没提交上去：后端没收到，重按「生成」');
+          renderNow();
+          H.lost = false;
+          if (H.sawDone) loadHistoryImg();   /* 提交丢了、图其实已经画完了 ⇒ 把历史补上 */
+        }
+      }
+    }
+    return;
+  }
+  IMG.heal.idle = 0;
+  if (job.state === 'done') IMG.heal.sawDone = true;
+  IMG.job = job;
+  if (job.state === 'running') {
+    /* 进程还在、但进度彻底不动（判断依据用 elapsed，step 在单张 8 步里可能是 0），
+       last_seen 落后同样说明桥已经不推它了 ⇒ 判成掉线，按钮交回给用户。 */
+    if (IMG.busy) {
+      const H = IMG.heal;
+      if (H.lastElapsed === job.elapsed) H.stall++;
+      else { H.stall = 0; H.lastElapsed = job.elapsed; }
+      const freshest = Math.max((job.started || 0), (job.last_seen || 0));
+      if (H.stall >= 4 || (freshest && (Date.now() / 1000 - freshest) > 45)) {
+        H.stall = 0;
+        if (IMG.timer) { clearInterval(IMG.timer); IMG.timer = null; }
+        setImgBusy(false);
+        setGenStatus('内核在跑，但进度 45 秒没动 —— 重按「生成」，或先点「释放显存」');
+        renderNow();
+        return;
+      }
+    }
+    $('#nowtitle').textContent = '正在画 · ' + (job.step || 0) + ' / ' + (job.total_steps || 0) + (job.node ? ' · ' + job.node : '') + ' · ' + fmt(job.elapsed, 1) + 's';
+    setGenStatus('生成中… ' + (job.step || 0) + ' / ' + (job.total_steps || 0));
+  } else if (job.state === 'done') {
+    clearInterval(IMG.timer); IMG.timer = null;
+    setImgBusy(false);
+    renderNow();
+    setGenStatus('完成 · ' + ((job.images || []).length) + ' 张 · ' + fmt(job.elapsed, 1) + 's');
+    loadHistoryImg();
+    toast('出图完成');
+  } else if (job.state === 'error') {
+    clearInterval(IMG.timer); IMG.timer = null;
+    setImgBusy(false); renderNow();
+    setGenStatus('失败：' + (job.error || '未知错误'));
+  }
+}
+$('#btnGen').onclick = imgGenerate;
+$('#btnCancel').onclick = async () => {
+  setGenStatus('正在取消…');
+  try { await fetch('/api/image/cancel', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' }); } catch (_) {}
+  if (IMG.timer) { clearInterval(IMG.timer); IMG.timer = null; }
+  setImgBusy(false);
+  setGenStatus('已取消');
+  IMG.heal = { idle: 0, lost: false, stall: 0, lastElapsed: -1 };
+  renderNow();
+  loadHistoryImg();
+};
+$('#iprompt').addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); imgGenerate(); } });
+
+/* ---------- 历史 ---------- */
+async function loadHistoryImg() {
+  let raw;
+  try { raw = await (await fetch('/api/image/history')).json(); } catch (_) { return; }
+  const list = Array.isArray(raw) ? raw : (raw && raw.batches) || [];
+  IMG.history = list;
+  renderHistory();
+}
+function renderHistory() {
+  const box = $('#history');
+  if (!IMG.history.length) {
+    box.innerHTML = '<div class="empty" style="margin-top:8vh"><h1>还没有历史</h1><div>左边写好提示词，点「生成」。</div></div>';
+    return;
+  }
+  const batches = IMG.history.slice().sort((a, b) => (b.gen || 0) - (a.gen || 0));
+  const html = batches.map((b) => {
+    const imgs = b.images || [];
+    const head = `<div class="hhead">
+      <span class="g">第 ${esc(b.gen)} 次</span>
+      <span class="m">${b.at ? new Date(b.at * 1000).toLocaleString('zh-CN') : ''} · seed ${esc(b.seed === null || b.seed === undefined ? '–' : b.seed)} · ${esc(b.steps || '?')} 步 · ${fmt(b.elapsed, 1)}s</span>
+      <span class="sp"></span>
+      <button class="mini" data-act="again" data-gen="${esc(b.gen)}">再用这张的参数</button>
+      <button class="mini" data-act="delbatch" data-gen="${esc(b.gen)}">删掉这一批</button>
+    </div>`;
+    if (!imgs.length) {
+      return `<div class="hgrp" data-gen="${esc(b.gen)}">${head}
+        <div class="hgone">这一批的图片文件已经不在了（提示词和参数还在）。${b.prompt ? '<div class="hprompt" style="margin-top:6px">' + esc(b.prompt) + '</div>' : ''}</div></div>`;
+    }
+    const refs = (b.refs || []).length ? `<div style="font-size:11.5px;color:#5f6b7a;margin-bottom:6px">参考图 ${b.refs.length} 张</div>` : '';
+    const grid = `<div class="hgrid">${imgs.map((im, i) => `<div class="hitem" data-gen="${esc(b.gen)}" data-i="${i}">
+        <img class="ph" src="${esc(im.url)}" loading="lazy" alt="">
+        <div class="cap">${esc(im.w ? im.w + '×' + im.h : (im.name || ''))} · ${Math.round((im.size || 0) / 1024)} KB${im.cached ? ' · 副本' : ''}</div>
+        <div class="acts"><button class="mini" data-act="delimg" data-gen="${esc(b.gen)}" data-name="${esc(im.name || '')}">删除这张</button></div>
+      </div>`).join('')}</div>`;
+    return `<div class="hgrp" data-gen="${esc(b.gen)}">${head}${refs}${b.prompt ? '<div class="hprompt">' + esc(b.prompt) + '</div>' : ''}<div style="height:8px"></div>${grid}</div>`;
+  }).join('');
+  box.innerHTML = html;
+
+  box.querySelectorAll('.hitem').forEach((it) => {
+    const b = IMG.history.find((x) => String(x.gen) === it.dataset.gen);
+    if (!b) return;
+    const list = (b.images || []).map((im) => ({ url: im.url, cap: '第 ' + b.gen + ' 次 · ' + (im.w ? im.w + '×' + im.h + ' · ' : '') + Math.round((im.size || 0) / 1024) + ' KB\nseed ' + b.seed + ' · ' + b.steps + ' 步 · ' + fmt(b.elapsed, 1) + 's\n' + (im.file || '') + (b.prompt ? '\n' + b.prompt : '') }));
+    const i = Math.min(list.length - 1, +it.dataset.i || 0);
+    it.addEventListener('click', (e) => { if (e.target.closest('button')) return; openLightbox(list, i); });
+  });
+  box.querySelectorAll('button[data-act]').forEach((btn) => btn.onclick = (e) => { e.stopPropagation(); histAction(btn.dataset.act, btn.dataset.gen, btn.dataset.name, btn); });
+}
+function histAsk() {
+  const withFiles = $('#iwithfiles').checked;
+  return confirm(withFiles
+    ? '确定删除这条历史记录，并且把磁盘上的图片文件也一起删掉吗？'
+    : '确定删除这条历史记录吗？（图片文件会保留，可勾选「删除时连图片文件一起删」改变行为）');
+}
+async function histAction(act, gen, name, btn) {
+  if (act === 'again') {
+    const b = IMG.history.find((x) => String(x.gen) === String(gen));
+    if (!b) return;
+    const p = b.params || {};
+    $('#iprompt').value = b.prompt || '';
+    $('#ineg').value = b.negative || '';
+    const set = (sel, v) => { if (v !== undefined && v !== null && $(sel)) $(sel).value = v; };
+    set('#isteps_n', p.steps); set('#isteps', p.steps);
+    set('#icfg_n', p.cfg); set('#icfg', p.cfg);
+    set('#iw', p.width); set('#ih', p.height);
+    set('#isampler', p.sampler_name); set('#isched', p.scheduler);
+    set('#ibatch', p.batch_size);
+    if (p.use_lora !== undefined) { $('#ilora').checked = !!p.use_lora; }
+    if (p.lora_strength !== undefined) { $('#ilorar').value = p.lora_strength; }
+    if (b.seed !== null && b.seed !== undefined) { $('#irandom').checked = false; $('#iseed').disabled = false; $('#iseed').value = b.seed; }
+    paintPairLabels();
+    toast('参数已回填，可以直接改提示词再生成');
+    return;
+  }
+  if (!histAsk()) return;
+  if (btn) btn.disabled = true;
+  const withFiles = $('#iwithfiles').checked;
+  try {
+    if (act === 'delbatch') {
+      await fetch('/api/image/history/delete', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ gen: int(gen, -1), files: withFiles }) });
+    } else if (act === 'delimg') {
+      await fetch('/api/image/history/delete', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ gen: int(gen, -1), name: name, files: withFiles }) });
+    }
+    await loadHistoryImg();
+  } catch (e) { toast('删除失败：' + e.message); if (btn) btn.disabled = false; }
+}
+$('#btnClear').onclick = async () => {
+  if (!IMG.history.length) return;
+  if (!confirm('清空全部历史记录？' + ($('#iwithfiles').checked ? '（图片文件也会一起删掉）' : '（图片文件保留）'))) return;
+  try {
+    await fetch('/api/image/history/clear', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ files: $('#iwithfiles').checked }) });
+    IMG.lastGen = 0;
+    await loadHistoryImg();
+  } catch (e) { toast('清空失败：' + e.message); }
+};
+async function imgCtl(path, label, okMsg) {
+  setGenStatus(label + '…');
+  try {
+    const r = await (await fetch(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' })).json();
+    setGenStatus(r.ok === false ? ('失败：' + (r.error || '')) : (okMsg || '完成'));
+  } catch (e) { setGenStatus('失败：' + e.message); }
+  await refresh();
+  setTimeout(loadHistoryImg, 800);
+}
+$('#btnBoot').onclick = () => imgCtl('/api/image/boot', '启动绘图内核', '绘图内核已启动');
+$('#btnFree').onclick = async () => {
+  setGenStatus('释放显存中…');
+  try {
+    const r = await (await fetch('/api/image/free', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' })).json();
+    setGenStatus(r.ok ? ('已释放，显存占用 ' + g(r, 'vram.used', '?') + ' MB') : ('释放失败：' + (r.error || '')));
+  } catch (e) { setGenStatus('释放失败：' + e.message); }
+  refresh();
+};
+$('#btnQuit').onclick = () => { if (confirm('停止绘图引擎？（正在画的任务会中断）')) imgCtl('/api/image/quit', '停止绘图引擎', '绘图引擎已停止'); };
+$('#btnOutdir').onclick = () => imgCtl('/api/image/open-path', '打开输出目录', '已打开输出目录');
+
+/* ================================ 设置抽屉 ================================ */
+/* <select> 只会给字符串，但有些设置是布尔（mmap）而后端按类型判断
+ * （`if (!s.mmap)`）：把字符串映射回 schema 自己的值，否则 "false" 会因为
+ * 非空字符串为真而静默变成「开启 no-mmap」。 */
+function coerce(key, raw) {
+  const it = ALL_ITEMS.find((i) => i.key === key);
+  if (it && it.options) {
+    const hit = it.options.find((p) => String(p[0]) === String(raw));
+    if (hit) return hit[0];
+  }
+  if (it && it.optionsFrom) {
+    const hit = (g(STATE, 'chat.catalog.' + it.optionsFrom, []) || []).find((o) => String(o.id) === String(raw));
+    if (hit) return hit.id;
+  }
+  return raw;
+}
+function fieldHtml(it) {
+  const v = DRAFT[it.key];
+  let ctl = '';
+  const chip = it.restart ? '<span class="chip r">需重启</span>' : '<span class="chip">热生效</span>';
+  if (it.type === 'select') {
+    const opts = it.optionsFrom ? (g(STATE, 'chat.catalog.' + it.optionsFrom, []) || []).map((o) => [o.id, o.name]) : it.options;
+    ctl = `<select data-k="${esc(it.key)}">${opts.map((p) => `<option value="${esc(p[0])}" ${String(p[0]) === String(v) ? 'selected' : ''}>${esc(p[1])}</option>`).join('')}</select>`;
+  } else if (it.type === 'checkbox') {
+    ctl = `<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-k="${esc(it.key)}" ${v ? 'checked' : ''} style="width:auto"> <span style="font-size:12.5px;color:var(--dim)">${v ? '已启用' : '未启用'}</span></label>`;
+  } else if (it.type === 'slider') {
+    ctl = `<input type="range" data-k="${esc(it.key)}" min="${it.min}" max="${it.max}" step="${it.step}" value="${esc(v)}"><span class="val" id="v_${esc(it.key)}">${esc(v)}${it.unit ? ' ' + esc(it.unit) : ''}</span>`;
+  } else if (it.type === 'number') {
+    ctl = `<input type="number" data-k="${esc(it.key)}" value="${esc(v)}">`;
+  } else if (it.type === 'dir') {
+    ctl = `<div style="display:flex;gap:8px;align-items:center"><input type="text" data-k="${esc(it.key)}" value="${esc(v)}"><button class="mini" data-pickdir="${esc(it.key)}">选择…</button></div>`;
+  } else {
+    ctl = `<input type="text" data-k="${esc(it.key)}" value="${esc(v)}">`;
+  }
+  let extra = '';
+  if (it.optionsFrom === 'models') {
+    const mo = (g(STATE, 'chat.catalog.models', []) || []).find((o) => String(o.id) === String(v));
+    if (mo && mo.note) extra = `<div class="help">${esc(mo.note)}</div>`;
+  }
+  return `<div class="field">
+    <div class="lab">${esc(it.label)}<span class="tip" data-tip="${esc(it.help)}">?</span>${chip}</div>
+    <div class="ctl">${ctl}</div>
+    <div class="help">${it.estimate ? `<span class="est">📊 ${esc(it.estimate)}</span>` : ''}</div>${extra}
+  </div>`;
+}
+function renderSettings() {
+  if (!STATE || !STATE.chat) return;
+  ALL_ITEMS = (STATE.chat.schema || []).flatMap((gr) => gr.items);
+  const tabs = [{ id: 'presets', title: '推荐配置' }, ...(STATE.chat.schema || []).map((gr) => ({ id: gr.id, title: gr.title })), { id: 'status', title: '状态' }];
+  $('#tabs').innerHTML = tabs.map((t, i) => `<button data-t="${esc(t.id)}" class="${i === 0 ? 'active' : ''}">${esc(t.title)}</button>`).join('');
+  const panes = [];
+  panes.push(`<div class="pane active" id="pane_presets">
+    <div class="note ok">点一下即用：需要的参数会自动写入；涉及启动参数时会<b>自动重启引擎</b>（约 8–12 秒）。</div>
+    <div class="presets">${(STATE.chat.presets || []).map((p) => `<button class="preset" data-preset="${esc(p.id)}"><div class="n">${esc(p.name)}</div><div class="d">${esc(p.desc)}</div></button>`).join('')}</div>
+    <div class="note warn">当前：上下文 ${Number(g(STATE, 'chat.settings.ctx', 0)).toLocaleString()} · ${g(STATE, 'chat.settings.vision') ? '视觉已开' : '视觉关闭'} · LoRA ${esc(g(STATE, 'chat.settings.lora', 'none'))} @ ${esc(g(STATE, 'chat.settings.loraScale', 1))}</div>
+  </div>`);
+  for (const gr of (STATE.chat.schema || [])) {
+    panes.push(`<div class="pane" id="pane_${esc(gr.id)}"><div class="grp"><h3>${esc(gr.icon || '')} ${esc(gr.title)}</h3>${gr.items.map(fieldHtml).join('')}</div></div>`);
+  }
+  panes.push(`<div class="pane" id="pane_status"><div class="note ok">改完点「应用」：热生效的参数立刻发送，启动参数会自动重启引擎。</div><div id="statBox">读取中…</div></div>`);
+  $('#setBody').innerHTML = panes.join('');
+  $('#tabs').querySelectorAll('button').forEach((b) => b.onclick = () => {
+    $('#tabs').querySelectorAll('button').forEach((x) => x.classList.remove('active'));
+    b.classList.add('active');
+    $$('#setBody .pane').forEach((p) => p.classList.remove('active'));
+    const pane = $('#pane_' + b.dataset.t);
+    if (pane) pane.classList.add('active');
+    if (b.dataset.t === 'status') renderStatus();
+  });
+  $('#setBody').querySelectorAll('[data-k]').forEach((el) => {
+    const k = el.dataset.k;
+    const sync = () => {
+      let v = el.type === 'checkbox' ? el.checked : el.value;
+      if (el.type === 'range' || el.type === 'number') v = Number(v);
+      else if (el.tagName === 'SELECT') v = coerce(k, v);
+      DRAFT[k] = v;
+      const vv = $('#v_' + k);
+      if (vv) { const it = ALL_ITEMS.find((i) => i.key === k); vv.textContent = v + (it && it.unit ? ' ' + it.unit : ''); }
+      markDirty();
+    };
+    el.addEventListener('input', sync);
+    el.addEventListener('change', sync);
+  });
+  /* 「选择…」按钮：弹 Windows 文件夹选择框（服务端 PowerShell -STA），拿到路径写进输入框，
+   * 之后照常走「应用」落盘 —— 这里不直接改配置文件。 */
+  $('#setBody').querySelectorAll('[data-pickdir]').forEach((b) => b.onclick = async () => {
+    const k = b.dataset.pickdir;
+    const inp = b.parentElement.querySelector('[data-k="' + k + '"]');
+    const cur = (inp && inp.value) || '';
+    b.disabled = true; const old = b.textContent; b.textContent = '选择中…';
+    try {
+      const r = await (await fetch('/api/agent/pick-dir', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ current: cur }) })).json();
+      if (r && r.ok && r.dir && !r.cancelled) {
+        if (inp) { inp.value = r.dir; inp.dispatchEvent(new Event('input', { bubbles: true })); }
+      } else if (r && r.error) { toast('选择目录失败：' + r.error); }
+    } catch (e) { toast('选择目录失败：' + e.message); }
+    b.disabled = false; b.textContent = old;
+  });
+  $('#setBody').querySelectorAll('[data-preset]').forEach((b) => b.onclick = async () => {
+    const id = b.dataset.preset;
+    b.disabled = true;
+    const n = b.querySelector('.n'); const old = n.textContent;
+    n.innerHTML = '应用中… <span class="spin"></span>';
+    try {
+      const r = await (await fetch('/api/preset', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: id }) })).json();
+      $('#setStatus').textContent = (r.ok ? '✔ ' : '✖ ') + (r.restarted ? '已重启引擎；' : '') + (r.lora ? ('LoRA scale → ' + JSON.stringify(r.lora.raw || r.lora.status || '')) : '') + (r.error || '');
+      await refresh();
+      DRAFT = Object.assign({}, g(STATE, 'chat.settings', {}));
+      renderSettings();
+      markDirty();
+      const st = $('#tabs').querySelector('[data-t="status"]');
+      if (st) st.click();
+    } catch (e) { $('#setStatus').textContent = '✖ ' + e.message; }
+    b.disabled = false; n.textContent = old;
+  });
+}
+function markDirty() {
+  if (!STATE || !DRAFT) return;
+  const cur = g(STATE, 'chat.settings', {});
+  const ch = Object.keys(DRAFT).filter((k) => JSON.stringify(DRAFT[k]) !== JSON.stringify(cur[k]));
+  const soft = new Set(['loraScale', 'reasoningEffort', 'maxTokens', 'temperature', 'topP', 'topK', 'minP', 'repeatPenalty', 'seed', 'systemPrompt', 'webSearch', 'imageMaxEdge', 'agentRoot', 'agentMode', 'agentPerm', 'agentMaxSteps', 'agentPermWrite', 'agentPermExec', 'docAutoRead', 'docMaxChars', 'docVision', 'docVisionPages']);
+  const hard = ch.filter((k) => !soft.has(k));
+  $('#dirty').textContent = ch.length ? (ch.length + ' 项已修改' + (hard.length ? '（' + hard.length + ' 项需重启）' : '（全部热生效）')) : '没有改动';
+  $('#dirty').style.color = ch.length ? '#d29922' : 'var(--dim)';
+}
+async function renderStatus() {
+  const st = g(STATE, 'chat', {}), im = g(STATE, 'image', {});
+  const s2 = g(STATE, 'chat.settings', {});
+  const m = (g(STATE, 'chat.catalog.models', []) || []).find((x) => x.id === s2.model);
+  $('#statBox').innerHTML = `
+    <div class="field"><div class="lab">对话引擎</div><div class="ctl">${st.alive ? (st.ready ? '运行中 · 就绪' : '运行中 · 启动中') : '未启动'}</div></div>
+    <div class="field"><div class="lab">健康检查</div><div class="ctl">${st.ready ? '✔ /health ok' : '✖ 未就绪'}</div></div>
+    <div class="field"><div class="lab">监听端口</div><div class="ctl">${esc(st.port)}</div></div>
+    <div class="field"><div class="lab">模型权重</div><div class="ctl" style="font-size:12px">${esc(m ? m.name : s2.model || '')}</div>${m && m.note ? `<div class="help">${esc(m.note)}</div>` : ''}</div>
+    <div class="field"><div class="lab">启动命令</div><div class="ctl" style="font-size:12px"></div><div class="help"><pre class="log" id="argsBox">读取中…</pre></div></div>
+    <div class="field"><div class="lab">LoRA 适配器</div><div class="ctl" style="font-size:12px">${st.loraAdapters ? esc(JSON.stringify(st.loraAdapters)) : '未挂载'}</div></div>
+    <div class="field"><div class="lab">绘图桥</div><div class="ctl">${im.alive ? '运行中 · 端口 ' + esc(im.port) : '未启动'}</div></div>
+    <div class="field"><div class="lab">ComfyUI</div><div class="ctl">${im.comfyAlive ? '✔ 就绪 · 端口 ' + esc(im.comfyPort) : '✖ 未就绪'}</div></div>
+    <div class="field"><div class="lab">应用端口</div><div class="ctl">${esc(g(STATE, 'app.port', ''))} · v${esc(g(STATE, 'app.version', ''))}</div></div>`;
+  try {
+    const l = await (await fetch('/api/log?which=chat&lines=40')).json();
+    const box = $('#argsBox');
+    if (box) {
+      const txt = String(l.text || '');
+      const line = txt.split(/\r?\n/).reverse().find((x) => x.includes('llama-server')) || '(尚无启动记录)';
+      box.textContent = line.slice(0, 900);
+    }
+  } catch (_) {}
+}
+function openSet() {
+  if (!STATE) return;
+  DRAFT = Object.assign({}, g(STATE, 'chat.settings', {}));
+  renderSettings();
+  $('#dirty').textContent = '没有改动';
+  $('#setStatus').textContent = '';
+  $('#mask').classList.add('show');
+  $('#drawer').classList.add('show');
+}
+function closeSet() { $('#mask').classList.remove('show'); $('#drawer').classList.remove('show'); }
+$('#btnSet').onclick = openSet;
+$('#btnCloseSet').onclick = closeSet;
+$('#mask').onclick = closeSet;
+$('#btnRevert').onclick = () => { DRAFT = Object.assign({}, g(STATE, 'chat.settings', {})); renderSettings(); markDirty(); };
+$('#btnApply').onclick = async () => {
+  const b = $('#btnApply'); b.disabled = true; b.textContent = '应用中…';
+  try {
+    const r = await (await fetch('/api/settings', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ settings: DRAFT }) })).json();
+    $('#setStatus').textContent = (r.ok ? '✔ 已应用 ' + ((r.changed || []).length) + ' 项' : '✖ ' + (r.error || ''))
+      + (r.restarted ? '（引擎已重启）' : '') + ((r.needRestart || []).length && !r.restarted ? '（需重启：' + r.needRestart.join(',') + '）' : '');
+    await refresh();
+    DRAFT = Object.assign({}, g(STATE, 'chat.settings', {}));
+    renderSettings();
+    markDirty();
+  } catch (e) { $('#setStatus').textContent = '✖ ' + e.message; }
+  b.disabled = false; b.textContent = '应用';
+};
+
+/* ================================ 日志 ================================ */
+let LOGWHICH = 'chat';
+async function loadLog() {
+  try {
+    const l = await (await fetch('/api/log?which=' + LOGWHICH + '&lines=200')).json();
+    $('#logBox').textContent = String(l.text || '(空)');
+    $('#logBox').scrollTop = $('#logBox').scrollHeight;
+  } catch (e) { $('#logBox').textContent = '读取失败：' + e.message; }
+}
+function openLog() { $('#maskLog').classList.add('show'); $('#drawerLog').classList.add('show'); loadLog(); }
+function closeLog() { $('#maskLog').classList.remove('show'); $('#drawerLog').classList.remove('show'); }
+$('#btnLog').onclick = openLog;
+$('#btnCloseLog').onclick = closeLog;
+$('#maskLog').onclick = closeLog;
+$('#logWhich').querySelectorAll('button').forEach((b) => b.onclick = () => {
+  $('#logWhich').querySelectorAll('button').forEach((x) => x.classList.remove('on'));
+  b.classList.add('on');
+  LOGWHICH = b.dataset.w;
+  loadLog();
+});
+
+/* ================================ 视图切换与轮询 ================================ */
+function setTab(t) {
+  CURTAB = t;
+  document.body.classList.toggle('tab-image', t === 'image');
+  $('#tabChat').classList.toggle('active', t === 'chat');
+  $('#tabImage').classList.toggle('active', t === 'image');
+  $('#paneChat').classList.toggle('active', t === 'chat');
+  $('#paneImage').classList.toggle('active', t === 'image');
+  if (t === 'chat') $('#bChat').classList.add('hid'); else $('#bImg').classList.add('hid');
+  if (t === 'image') { loadHistoryImg(); refresh(); }
+}
+$('#tabChat').onclick = () => setTab('chat');
+$('#tabImage').onclick = () => setTab('image');
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if ($('#lightbox').classList.contains('show')) closeLightbox();
+    else { closeSet(); $('#maskLog').classList.remove('show'); }
+  } else if ($('#lightbox').classList.contains('show')) {
+    if (e.key === 'ArrowLeft') lbStep(-1);
+    if (e.key === 'ArrowRight') lbStep(1);
+  }
+});
+
+/* ---------------------------------------------------------------- boot */
+(async function boot() {
+  paintPairLabels();
+  syncCanvasUI();            // 参考图为空时「宽/高」可用、画幅各子项隐藏，先按默认摆一次
+  await sessBoot();          // 会话先就位，render 才有东西可画
+  render(false);
+  await refresh();
+  if (STATE) paintQuick();
+  loadHistoryImg();
+  setInterval(refresh, 3000);            // 顶栏 / 模式 / 引擎状态
+  setInterval(() => { if (CURTAB === 'image' && !IMG.busy) loadHistoryImg(); }, 15000);
+  refresh();
+  const t = setInterval(() => { if (STATE) { paintQuick(); clearInterval(t); } }, 400);
+})();
+</script>
+</body>
+</html>
